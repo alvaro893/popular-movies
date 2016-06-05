@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2013 The Android Open Source Project
+ */
 package es.alvaroweb.popularmovies;
 
 import android.os.Bundle;
@@ -5,14 +8,21 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.GridLayout;
+import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.target.Target;
+import com.google.gson.Gson;
+
+import java.net.URL;
+import java.net.URLConnection;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,21 +33,15 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        // Get data
+        Gson gson = new Gson();
+        ResultMovies resultMovies = gson.fromJson(RawData.mdata, ResultMovies.class);
 
-        ImageView imageView = (ImageView) findViewById(R.id.my_image_view);
-        Target<GlideDrawable> target = Glide
-                .with(this)
-                .load("http://i.imgur.com/DvpvklR.png")
-                .error(android.R.drawable.ic_delete)
-                .into(imageView);
+        // Set data in adapter
+        MoviesAdapter moviesAdapter = new MoviesAdapter(this, resultMovies.getResults());
+        GridView moviesGridView = (GridView) findViewById(R.id.movies_grid_view);
+        moviesGridView.setAdapter(moviesAdapter);
+
     }
 
     @Override

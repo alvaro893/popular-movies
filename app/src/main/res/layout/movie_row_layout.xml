@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="100dp">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@android:drawable/ic_dialog_alert"
+        android:id="@+id/movie_image_row"
+        android:layout_gravity="center"
+        android:contentDescription="@string/movie_image_description" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Title"
+        android:textColor="@android:color/darker_gray"
+        android:id="@+id/movie_title_row"
+        android:layout_gravity="center_horizontal|top"
+        android:layout_marginTop="@dimen/activity_vertical_margin"/>
+
+</FrameLayout>
