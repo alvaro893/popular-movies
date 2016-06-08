@@ -4,6 +4,7 @@
 package es.alvaroweb.popularmovies;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,14 +32,16 @@ public class MoviesAdapter extends ArrayAdapter<Movie> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         Movie movie = getItem(position);
+        Log.d(DEBUG_TAG, movie.getTitle());
 
+        // Inflate layout if it is not being reused
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext())
                     .inflate(R.layout.movie_row_layout, parent, false);
-
-            image = (ImageView) convertView.findViewById(R.id.movie_image_row);
-            setImage(image, movie.getPosterPath());
         }
+
+        image = (ImageView) convertView.findViewById(R.id.movie_image_row);
+        setImage(image, movie.getPosterPath());
         return convertView;
     }
     /** Loads and sets the image in the given relativePath parameter using a external library */

@@ -26,6 +26,8 @@ import java.net.URLConnection;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String DEBUG_TAG = MainActivity.class.getSimpleName();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
