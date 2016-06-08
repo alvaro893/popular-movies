@@ -13,10 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/movies_grid_view"
-        android:layout_gravity="center"
-        android:numColumns="2"
-        android:stretchMode="columnWidth"
-        android:gravity="center"
+        android:numColumns="@integer/movie_thumbnail_columns"
         />
 
 </FrameLayout>
