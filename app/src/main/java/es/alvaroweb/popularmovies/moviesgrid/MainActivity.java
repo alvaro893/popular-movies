@@ -1,12 +1,11 @@
 /*
  * Copyright (C) 2013 The Android Open Source Project
  */
-package es.alvaroweb.popularmovies;
+package es.alvaroweb.popularmovies.moviesgrid;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -18,8 +17,12 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-
+import es.alvaroweb.popularmovies.R;
+import es.alvaroweb.popularmovies.details.DetailsActivity;
+import es.alvaroweb.popularmovies.model.Movie;
+import es.alvaroweb.popularmovies.model.ResultMovies;
+import es.alvaroweb.popularmovies.networking.MovieService;
+import es.alvaroweb.popularmovies.settings.SettingsActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -33,7 +36,7 @@ public class MainActivity extends AppCompatActivity
     private final static String URL_BASE = "https://api.themoviedb.org/";
     private final static String OPTION_POPULAR = "popular";
     private final static String OPTION_TOP_RATED = "top_rated";
-    private  MovieService service;
+    private MovieService service;
     private Retrofit retrofit;
     private ResultMovies resultMovies;
     private GridView moviesGridView;

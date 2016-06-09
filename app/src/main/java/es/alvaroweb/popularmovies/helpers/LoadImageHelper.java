@@ -1,15 +1,15 @@
 /**
  * Copyright (C) 2016 Alvaro Bolanos Rodriguez
  */
-package es.alvaroweb.popularmovies;
+package es.alvaroweb.popularmovies.helpers;
 
 import android.content.Context;
 import android.widget.ImageView;
 
 import com.bumptech.glide.DrawableRequestBuilder;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.target.Target;
+
+import es.alvaroweb.popularmovies.R;
 
 /*
  * TODO: Create JavaDoc

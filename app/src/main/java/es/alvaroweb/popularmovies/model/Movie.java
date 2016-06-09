@@ -1,13 +1,11 @@
 /**
  * Copyright (C) 2016 Alvaro Bolanos Rodriguez
  */
-package es.alvaroweb.popularmovies;
+package es.alvaroweb.popularmovies.model;
 
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.util.Date;
 
 /*
  * Represent a movie, objects from this class are deserialized from

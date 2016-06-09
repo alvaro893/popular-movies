@@ -1,10 +1,12 @@
 /**
  * Copyright (C) 2016 Alvaro Bolanos Rodriguez
  */
-package es.alvaroweb.popularmovies;
+package es.alvaroweb.popularmovies.settings;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
+
+import es.alvaroweb.popularmovies.R;
 
 /*
  * TODO: Create JavaDoc

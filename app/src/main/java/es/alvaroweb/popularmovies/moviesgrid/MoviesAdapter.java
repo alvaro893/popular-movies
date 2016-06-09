@@ -1,19 +1,20 @@
 /**
  * Copyright (C) 2016 Alvaro Bolanos Rodriguez
  */
-package es.alvaroweb.popularmovies;
+package es.alvaroweb.popularmovies.moviesgrid;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
-
 import java.util.List;
+
+import es.alvaroweb.popularmovies.R;
+import es.alvaroweb.popularmovies.helpers.LoadImageHelper;
+import es.alvaroweb.popularmovies.model.Movie;
 
 /*
  *  Adapter for Movies in the Main Activity

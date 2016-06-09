@@ -1,22 +1,19 @@
-package es.alvaroweb.popularmovies;
+package es.alvaroweb.popularmovies.details;
 
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.media.Rating;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-
 import java.io.Serializable;
+
+import es.alvaroweb.popularmovies.R;
+import es.alvaroweb.popularmovies.helpers.LoadImageHelper;
+import es.alvaroweb.popularmovies.model.Movie;
 
 public class DetailsActivity extends AppCompatActivity {
     private Movie movie;

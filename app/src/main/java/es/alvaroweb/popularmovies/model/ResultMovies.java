@@ -1,7 +1,7 @@
 /**
  * Copyright (C) 2016 Alvaro Bolanos Rodriguez
  */
-package es.alvaroweb.popularmovies;
+package es.alvaroweb.popularmovies.model;
 
 import com.google.gson.annotations.SerializedName;
 
