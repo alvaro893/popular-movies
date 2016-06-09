@@ -20,11 +20,25 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class MainActivity extends AppCompatActivity
         implements AdapterView.OnItemClickListener {
 
     private static final String DEBUG_TAG = MainActivity.class.getSimpleName();
+    private final static String URL_BASE = "https://api.themoviedb.org/";
+    private final static String OPTION_POPULAR = "popular";
+    private final static String OPTION_TOP_RATED = "top_rated";
+    private  MovieService service;
+    private Retrofit retrofit;
     private ResultMovies resultMovies;
+    private GridView moviesGridView;
+    private MoviesAdapter moviesAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,19 +48,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         
         // Get data
-        Gson gson = new Gson();
-        if(isPopularMoviesSetting()){
-            resultMovies = gson.fromJson(RawData.popularMovies, ResultMovies.class);
-        }else{
-            resultMovies = gson.fromJson(RawData.topRated, ResultMovies.class);
-        }
-
-        // Set data in adapter
-        MoviesAdapter moviesAdapter = new MoviesAdapter(this, resultMovies.getResults());
-        GridView moviesGridView = (GridView) findViewById(R.id.movies_grid_view);
-        moviesGridView.setAdapter(moviesAdapter);
-        moviesGridView.setOnItemClickListener(this);
-
+        setConnection();
     }
 
     @Override
@@ -73,6 +75,13 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    private void setGridOfMovies(){
+        moviesAdapter = new MoviesAdapter(this, resultMovies.getResults());
+        moviesGridView = (GridView) findViewById(R.id.movies_grid_view);
+        moviesGridView.setAdapter(moviesAdapter);
+        moviesGridView.setOnItemClickListener(this);
+    }
+
     private boolean isPopularMoviesSetting(){
 
         String key = getString(R.string.pref_by_popular_key);
@@ -84,6 +93,38 @@ public class MainActivity extends AppCompatActivity
             setTitle(title);
         }
         return isPopularSetting;
+    }
+
+    private void setConnection(){
+        String API_KEY = getString(R.string.API_KEY);
+        // configure retrofit
+        retrofit = new Retrofit.Builder()
+                .baseUrl(URL_BASE)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        service = retrofit.create(MovieService.class);
+
+        // do request
+        Call<ResultMovies> moviesCall;
+        if(isPopularMoviesSetting()){
+            moviesCall = service.getMovies(OPTION_POPULAR, API_KEY);
+        }else{
+            moviesCall = service.getMovies(OPTION_TOP_RATED, API_KEY);
+        }
+        // asynchronous call
+        moviesCall.enqueue(new Callback<ResultMovies>() {
+            @Override
+            public void onResponse(Call<ResultMovies> call, Response<ResultMovies> response) {
+                Log.d(DEBUG_TAG, "response:" + response.code() + " for:" + call.request().url().toString());
+                resultMovies = response.body();
+                setGridOfMovies();
+            }
+
+            @Override
+            public void onFailure(Call<ResultMovies> call, Throwable t) {
+                Log.d(DEBUG_TAG, "error:" + t.getMessage() + " for:" + call.request().url().toString());
+            }
+        });
     }
 
     @Override
