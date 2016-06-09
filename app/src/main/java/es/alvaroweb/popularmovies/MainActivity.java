@@ -13,12 +13,18 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements AdapterView.OnItemClickListener {
+
     private static final String DEBUG_TAG = MainActivity.class.getSimpleName();
+    private ResultMovies resultMovies;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
         
         // Get data
         Gson gson = new Gson();
-        ResultMovies resultMovies;
         if(isPopularMoviesSetting()){
             resultMovies = gson.fromJson(RawData.popularMovies, ResultMovies.class);
         }else{
@@ -40,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         MoviesAdapter moviesAdapter = new MoviesAdapter(this, resultMovies.getResults());
         GridView moviesGridView = (GridView) findViewById(R.id.movies_grid_view);
         moviesGridView.setAdapter(moviesAdapter);
+        moviesGridView.setOnItemClickListener(this);
 
     }
 
@@ -78,5 +84,15 @@ public class MainActivity extends AppCompatActivity {
             setTitle(title);
         }
         return isPopularSetting;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Movie selectedMovie = resultMovies.getResults().get(position);
+        Intent intentDetailActivity = new Intent(this, DetailsActivity.class);
+
+        intentDetailActivity.putExtra(getString(R.string.SELECTED_MOVIE), selectedMovie);
+        startActivity(intentDetailActivity);
+        Toast.makeText(this, selectedMovie.getTitle(), Toast.LENGTH_LONG).show();
     }
 }

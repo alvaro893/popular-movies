@@ -5,15 +5,24 @@ package es.alvaroweb.popularmovies;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+import java.text.DateFormat;
+import java.util.Date;
+
 /*
  * Represent a movie, objects from this class are deserialized from
  * a JSON document. Note: it does not use all properties in the JSON but
  * can be extended
  */
-public class Movie {
+public class Movie implements Serializable {
     private String title;
     private int id;
     private double popularity;
+    private String overview;
+    @SerializedName("vote_average")
+    private float voteAverage;
+    @SerializedName("release_date")
+    private String releaseDate;
     @SerializedName("poster_path")
     private String posterPath;
     @SerializedName("backdrop_path")
@@ -57,6 +66,36 @@ public class Movie {
 
     public void setBackdropPath(String backdropPath) {
         this.backdropPath = backdropPath;
+    }
+
+    public String getOverview() {
+        return overview;
+    }
+
+    public void setOverview(String overview) {
+        this.overview = overview;
+    }
+
+    public float getVoteAverage() {
+        return voteAverage;
+    }
+
+    public void setVoteAverage(float voteAverage) {
+        this.voteAverage = voteAverage;
+    }
+
+    /** Returns an array of strings with the date:
+     * [0] -> year,
+     * [1] -> month,
+     * [2] -> day
+     * */
+    public String[] getReleaseDate() {
+        String[] date = releaseDate.split("-");
+        return date;
+    }
+
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
     }
 
     @Override
