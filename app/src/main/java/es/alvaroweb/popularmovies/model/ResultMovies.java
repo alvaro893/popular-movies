@@ -34,4 +34,18 @@ public class ResultMovies {
     public int getTotalPages() {
         return totalPages;
     }
+
+    public int getNextPage(){
+        int next = page + 1;
+        if (next <= totalPages){
+            return next;
+        }else return 0;
+    }
+
+    public int getPreviousPage(){
+        int prev = page - 1;
+        if (prev > 0){
+            return prev;
+        }else return 0;
+    }
 }

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.Toast;
 
@@ -39,8 +41,10 @@ public class MainActivity extends AppCompatActivity
     private MovieService service;
     private Retrofit retrofit;
     private ResultMovies resultMovies;
-    private GridView moviesGridView;
     private MoviesAdapter moviesAdapter;
+    private GridView moviesGridView;
+    private FloatingActionButton leftButton;
+    private FloatingActionButton rightButton;
 
 
     @Override
@@ -52,6 +56,7 @@ public class MainActivity extends AppCompatActivity
         
         // Get data
         setConnection();
+        doRequest(1);
     }
 
     @Override
@@ -83,6 +88,32 @@ public class MainActivity extends AppCompatActivity
         moviesGridView = (GridView) findViewById(R.id.movies_grid_view);
         moviesGridView.setAdapter(moviesAdapter);
         moviesGridView.setOnItemClickListener(this);
+        moviesAdapter.notifyDataSetChanged();
+
+        leftButton = (FloatingActionButton) findViewById(R.id.prev_fab);
+        rightButton = (FloatingActionButton) findViewById(R.id.next_fab);
+
+        leftButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                paginate(v);
+            }
+        });
+
+        rightButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                paginate(v);
+            }
+        });
+    }
+
+    private void paginate(View v) {
+        if(v.getId() == R.id.prev_fab){
+            doRequest(resultMovies.getPreviousPage());
+        }else{
+            doRequest(resultMovies.getNextPage());
+        }
     }
 
     private boolean isPopularMoviesSetting(){
@@ -98,21 +129,18 @@ public class MainActivity extends AppCompatActivity
         return isPopularSetting;
     }
 
-    private void setConnection(){
-        String API_KEY = getString(R.string.API_KEY);
-        // configure retrofit
-        retrofit = new Retrofit.Builder()
-                .baseUrl(URL_BASE)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        service = retrofit.create(MovieService.class);
+    /** fetchs a ResultMovie JSON,
+     * @param page must be greater than 0*/
+    private void doRequest(int page){
+        if(page <= 0) return;
 
-        // do request
+        final String API_KEY = getString(R.string.API_KEY);
         Call<ResultMovies> moviesCall;
+
         if(isPopularMoviesSetting()){
-            moviesCall = service.getMovies(OPTION_POPULAR, API_KEY);
+            moviesCall = service.getMovies(OPTION_POPULAR, API_KEY, page);
         }else{
-            moviesCall = service.getMovies(OPTION_TOP_RATED, API_KEY);
+            moviesCall = service.getMovies(OPTION_TOP_RATED, API_KEY, page);
         }
         // asynchronous call
         moviesCall.enqueue(new Callback<ResultMovies>() {
@@ -128,6 +156,15 @@ public class MainActivity extends AppCompatActivity
                 Log.d(DEBUG_TAG, "error:" + t.getMessage() + " for:" + call.request().url().toString());
             }
         });
+    }
+
+    private void setConnection(){
+        // configure retrofit
+        retrofit = new Retrofit.Builder()
+                .baseUrl(URL_BASE)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        service = retrofit.create(MovieService.class);
     }
 
     @Override
