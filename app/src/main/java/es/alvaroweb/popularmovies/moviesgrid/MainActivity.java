@@ -137,6 +137,5 @@ public class MainActivity extends AppCompatActivity
 
         intentDetailActivity.putExtra(getString(R.string.SELECTED_MOVIE), selectedMovie);
         startActivity(intentDetailActivity);
-        Toast.makeText(this, selectedMovie.getTitle(), Toast.LENGTH_LONG).show();
     }
 }
