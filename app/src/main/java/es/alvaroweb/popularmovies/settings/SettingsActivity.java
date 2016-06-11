@@ -1,3 +1,7 @@
+/**
+ * Copyright (C) 2016 Alvaro Bolanos Rodriguez
+ */
+
 package es.alvaroweb.popularmovies.settings;
 
 import android.os.Bundle;
@@ -6,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 
 import es.alvaroweb.popularmovies.R;
 
+/** Loads the Settingsfragment **/
 public class SettingsActivity extends AppCompatActivity {
 
     @Override

@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2013 The Android Open Source Project
+/**
+ * Copyright (C) 2016 Alvaro Bolanos Rodriguez
  */
 package es.alvaroweb.popularmovies.moviesgrid;
 

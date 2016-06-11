@@ -1,3 +1,7 @@
+/**
+ * Copyright (C) 2016 Alvaro Bolanos Rodriguez
+ */
+
 package es.alvaroweb.popularmovies.details;
 
 import android.graphics.PorterDuff;
@@ -15,6 +19,7 @@ import es.alvaroweb.popularmovies.R;
 import es.alvaroweb.popularmovies.helpers.LoadImageHelper;
 import es.alvaroweb.popularmovies.model.Movie;
 
+/** Shows the details of a Movie after clicking it **/
 public class DetailsActivity extends AppCompatActivity {
     private Movie movie;
     private TextView plot;
@@ -52,7 +57,7 @@ public class DetailsActivity extends AppCompatActivity {
         year.setText("("+movie.getReleaseDate() [0] + ")");
         rating.setRating( movie.getVoteAverage() / 2);
 
-        //fix the rating bar color
+        //fix the rating bar color (for previous android versions)
         Drawable drawable = rating.getProgressDrawable();
         drawable.setColorFilter(getResources().getColor(R.color.colorAccent), PorterDuff.Mode.SRC_ATOP);
 

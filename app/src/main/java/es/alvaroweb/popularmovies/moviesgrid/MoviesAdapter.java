@@ -1,6 +1,7 @@
 /**
  * Copyright (C) 2016 Alvaro Bolanos Rodriguez
  */
+
 package es.alvaroweb.popularmovies.moviesgrid;
 
 import android.content.Context;
