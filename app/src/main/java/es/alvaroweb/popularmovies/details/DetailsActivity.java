@@ -12,9 +12,13 @@ import android.support.v7.widget.Toolbar;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.Serializable;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import es.alvaroweb.popularmovies.R;
 import es.alvaroweb.popularmovies.helpers.LoadImageHelper;
 import es.alvaroweb.popularmovies.model.Movie;
@@ -22,11 +26,11 @@ import es.alvaroweb.popularmovies.model.Movie;
 /** Shows the details of a Movie after clicking it **/
 public class DetailsActivity extends AppCompatActivity {
     private Movie movie;
-    private TextView plot;
-    private TextView year;
-    private ImageView backdrop;
-    private TextView title;
-    private RatingBar rating;
+    @BindView(R.id.plot_text_view)  TextView plot;
+    @BindView(R.id.year_text_view) TextView year;
+    @BindView(R.id.back_drop_image) ImageView backdrop;
+    @BindView(R.id.title_text_view) TextView title;
+    @BindView(R.id.rating_bar) RatingBar rating;
 
 
     @Override
@@ -36,6 +40,7 @@ public class DetailsActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        ButterKnife.bind(this);
         getSelectedMovie();
         setTitle(movie.getTitle());
 
@@ -46,15 +51,10 @@ public class DetailsActivity extends AppCompatActivity {
 
     private void initializeUiComponents(){
         LoadImageHelper imageHelper = new LoadImageHelper(this);
-        title = (TextView) findViewById(R.id.title_text_view);
-        plot = (TextView) findViewById(R.id.plot_text_view);
-        year = (TextView) findViewById(R.id.year_text_view);
-        backdrop = (ImageView) findViewById(R.id.back_drop_image);
-        rating = (RatingBar) findViewById(R.id.rating_bar);
 
         title.setText(movie.getTitle());
         plot.setText(movie.getOverview());
-        year.setText("("+movie.getReleaseDate() [0] + ")");
+        year.setText(String.format("(%s)", movie.getReleaseDate()[0]));
         rating.setRating( movie.getVoteAverage() / 2);
 
         //fix the rating bar color (for previous android versions)
