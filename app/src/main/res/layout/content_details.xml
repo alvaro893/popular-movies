@@ -12,27 +12,33 @@
     tools:context=".details.DetailsActivity"
     tools:showIn="@layout/activity_details">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="title"
             android:id="@+id/title_text_view"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            />
+            android:layout_marginEnd="6dp"
+            android:layout_marginRight="6dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="year"
+            android:id="@+id/year_text_view"/>
+    </LinearLayout>
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:contentDescription="@string/movie_image_description"
-            android:src="@android:drawable/ic_dialog_alert"
-            android:id="@+id/back_drop_image"
-            android:layout_below="@+id/plot_text_view" />
+
 
         <TextView
             android:layout_width="match_parent"
@@ -40,24 +46,33 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="plot"
             android:id="@+id/plot_text_view"
-            android:layout_below="@+id/title_text_view"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignRight="@+id/back_drop_image"
-            android:layout_alignEnd="@+id/back_drop_image"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"/>
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/trailer_list_view"
             android:layout_marginBottom="10dp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:contentDescription="@string/movie_image_description"
+            android:src="@android:drawable/ic_dialog_alert"
+            android:id="@+id/back_drop_image" />
+
+        <ListView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="year"
-            android:id="@+id/year_text_view"
-            android:layout_marginLeft="14dp"
-            android:layout_marginStart="14dp"
-            android:layout_alignBottom="@+id/title_text_view"
-            android:layout_toRightOf="@+id/title_text_view"
-            android:layout_toEndOf="@+id/title_text_view" />
-    </RelativeLayout>
+            android:id="@+id/review_list_view"
+            />
+
+        <!--this text view is meant to avoid the rating
+         stars overlapping when the user scroll all the way down-->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="60dp" />
+
+    </LinearLayout>
 
 </ScrollView>
