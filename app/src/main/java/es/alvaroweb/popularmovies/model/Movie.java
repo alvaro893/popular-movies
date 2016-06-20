@@ -14,7 +14,7 @@ import java.io.Serializable;
  */
 public class Movie implements Serializable {
     private String title;
-    private int id;
+    private long id;
     private double popularity;
     private String overview;
     @SerializedName("vote_average")
@@ -34,11 +34,11 @@ public class Movie implements Serializable {
         this.title = title;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

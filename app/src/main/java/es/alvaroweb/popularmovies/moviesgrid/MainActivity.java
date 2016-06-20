@@ -4,9 +4,7 @@
 package es.alvaroweb.popularmovies.moviesgrid;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -23,24 +21,19 @@ import es.alvaroweb.popularmovies.R;
 import es.alvaroweb.popularmovies.details.DetailsActivity;
 import es.alvaroweb.popularmovies.model.Movie;
 import es.alvaroweb.popularmovies.model.ResultMovies;
-import es.alvaroweb.popularmovies.networking.MovieService;
+import es.alvaroweb.popularmovies.model.ResultVideos;
+import es.alvaroweb.popularmovies.networking.ApiConnection;
 import es.alvaroweb.popularmovies.settings.SettingsActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String DEBUG_TAG = MainActivity.class.getSimpleName();
-    private final static String URL_BASE = "https://api.themoviedb.org/";
-    private final static String OPTION_POPULAR = "popular";
-    private final static String OPTION_TOP_RATED = "top_rated";
-    private MovieService service;
-    private Retrofit retrofit;
     private ResultMovies resultMovies;
     private MoviesAdapter moviesAdapter;
+    private ApiConnection apiConnection;
     @BindView(R.id.movies_grid_view) GridView moviesGridView;
 
 
@@ -53,8 +46,21 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         // Get data
-        setConnection();
-        doRequest(1);
+        getResultMovies(1);
+        //delete this
+        apiConnection.getVideos(550, new Callback<ResultVideos>() {
+            @Override
+            public void onResponse(Call<ResultVideos> call, Response<ResultVideos> response) {
+                ResultVideos resultVideos = response.body();
+                ResultVideos.Video video = resultVideos.getResults().get(0);
+                Log.d(DEBUG_TAG, video.getName());
+            }
+
+            @Override
+            public void onFailure(Call<ResultVideos> call, Throwable t) {
+
+            }
+        });
     }
 
     @Override
@@ -89,46 +95,19 @@ public class MainActivity extends AppCompatActivity {
 
     private void paginate(View v) {
         if (v.getId() == R.id.prev_fab) {
-            doRequest(resultMovies.getPreviousPage());
+            getResultMovies(resultMovies.getPreviousPage());
         } else {
-            doRequest(resultMovies.getNextPage());
+            getResultMovies(resultMovies.getNextPage());
         }
     }
 
-    private boolean isPopularMoviesSetting() {
-
-        String key = getString(R.string.pref_by_popular_key);
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean isPopularSetting = preferences.getBoolean(key, true);
-        // change activity title
-        if (!isPopularSetting) {
-            String title = getString(R.string.top_rated_title);
-            setTitle(title);
-        }
-        return isPopularSetting;
-    }
-
-    /**
-     * fetchs a ResultMovie JSON,
-     *
-     * @param page must be greater than 0
-     */
-    private void doRequest(int page) {
-        if (page <= 0) return;
-
-        final String API_KEY = getString(R.string.API_KEY);
-        Call<ResultMovies> moviesCall;
-
-        if (isPopularMoviesSetting()) {
-            moviesCall = service.getMovies(OPTION_POPULAR, API_KEY, page);
-        } else {
-            moviesCall = service.getMovies(OPTION_TOP_RATED, API_KEY, page);
-        }
-        // asynchronous call
-        moviesCall.enqueue(new Callback<ResultMovies>() {
+    /** executes a callback when it get the results from the network **/
+    private void getResultMovies(int page){
+        apiConnection = new ApiConnection(this);
+        apiConnection.getMovies(page, new Callback<ResultMovies>() {
             @Override
             public void onResponse(Call<ResultMovies> call, Response<ResultMovies> response) {
-                Log.d(DEBUG_TAG, "response:" + response.code() + " for:" + call.request().url().toString());
+                //Log.d(DEBUG_TAG, "response:" + response.code() + " for:" + call.request().url().toString());
                 resultMovies = response.body();
                 setGridOfMovies();
             }
@@ -138,15 +117,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(DEBUG_TAG, "error:" + t.getMessage() + " for:" + call.request().url().toString());
             }
         });
-    }
-
-    private void setConnection() {
-        // configure retrofit
-        retrofit = new Retrofit.Builder()
-                .baseUrl(URL_BASE)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        service = retrofit.create(MovieService.class);
     }
 
 
