@@ -10,4 +10,6 @@
     <string name="top_rated_title">Top Rated</string>
     <string name="title_activity_details">DetailsActivity</string>
     <string name="SELECTED_MOVIE">selected_movie</string>
+    <string name="review_title">Reviews</string>
+    <string name="no_reviews_warning">No reviews yet</string>
 </resources>

@@ -5,8 +5,6 @@
 package es.alvaroweb.popularmovies.details;
 
 import android.content.Intent;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -17,7 +15,6 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.RatingBar;
 import android.widget.TextView;
 
 import java.io.Serializable;
@@ -43,9 +40,11 @@ public class DetailsActivity extends AppCompatActivity {
     @BindView(R.id.year_text_view) TextView year;
     @BindView(R.id.back_drop_image) ImageView backdrop;
     @BindView(R.id.title_text_view) TextView title;
-    @BindView(R.id.rating_bar) RatingBar rating;
-    @BindView(R.id.trailer_list_view) ListView trailerView;
-    @BindView(R.id.review_list_view) ListView reviewView;
+    //@BindView(R.id.duration_text_view) TextView duration;
+    @BindView(R.id.rating_text_view) TextView rating;
+    @BindView(R.id.trailer_list_view) ListView trailerList;
+    @BindView(R.id.review_list_view) ListView reviewList;
+    @BindView(R.id.review_title_text_view) TextView reviewTitle;
     private ResultVideos resultVideos;
     private VideoAdapter videoAdapter;
     private ReviewAdapter reviewAdapter;
@@ -56,86 +55,64 @@ public class DetailsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // ui tasks
         setContentView(R.layout.activity_details);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        apiConnection = new ApiConnection(this);
-
-        ButterKnife.bind(this);
         getSelectedMovie();
         setTitle(movie.getTitle());
-        getResultVideos();
-        getResultReviews(1);
-
         initializeUiComponents();
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        // network tasks
+        apiConnection = new ApiConnection(this);
+        requestResultVideos();
+        requestResultReviews(1);
+
+
     }
 
     private void initializeUiComponents(){
+        ButterKnife.bind(this);
         LoadImageHelper imageHelper = new LoadImageHelper(this);
-
         title.setText(movie.getTitle());
         plot.setText(movie.getOverview());
         year.setText(String.format("(%s)", movie.getReleaseDate()[0]));
-        rating.setRating( movie.getVoteAverage() / 2);
-
-        //fix the rating bar color (for previous android versions)
-        Drawable drawable = rating.getProgressDrawable();
-        drawable.setColorFilter(getResources().getColor(R.color.colorAccent), PorterDuff.Mode.SRC_ATOP);
-
+        rating.setText(String.valueOf(movie.getVoteAverage()));
+        //duration.setText(movie.getRuntime());
         imageHelper.setImage(backdrop, movie.getBackdropPath() , false);
-
     }
 
-    private void getResultVideos() {
-        apiConnection.getVideos(movie.getId(), new Callback<ResultVideos>() {
-            @Override
-            public void onResponse(Call<ResultVideos> call, Response<ResultVideos> response) {
-                resultVideos = response.body();
-                setVideoAdapter();
-            }
-
-            @Override
-            public void onFailure(Call<ResultVideos> call, Throwable t) {
-                t.printStackTrace();
-            }
-        });
+    private void requestResultVideos() {
+        apiConnection.getVideos(movie.getId(), new TrailerCallback());
     }
 
-    private void getResultReviews(int page){
-        Callback<ResultReviews> callback = new Callback<ResultReviews>() {
-            @Override
-            public void onResponse(Call<ResultReviews> call, Response<ResultReviews> response) {
-                resultReviews = response.body();
-                setReviewAdapter();
-            }
-
-            @Override
-            public void onFailure(Call<ResultReviews> call, Throwable t) {
-                t.printStackTrace();
-            }
-        };
-        apiConnection.getReviews(movie.getId(), page, callback);
+    private void requestResultReviews(int page){
+        apiConnection.getReviews(movie.getId(), page, new ReviewCallback());
     }
 
+    /** get the selected movie by the user from intent **/
     private void getSelectedMovie(){
         Bundle extras = this.getIntent().getExtras();
         Serializable movie = extras.getSerializable(getString(R.string.SELECTED_MOVIE));
         this.movie = (Movie) movie;
-
     }
 
-    private void setVideoAdapter(){
+    /** must be called asynchronously **/
+    private void setVideos(){
         videoAdapter = new VideoAdapter(this, resultVideos.getResults());
-        trailerView.setAdapter(videoAdapter);
-        justifyListViewHeightBasedOnChildren(trailerView);
+        trailerList.setAdapter(videoAdapter);
+        justifyListViewHeightBasedOnChildren(trailerList);
     }
 
-    private void setReviewAdapter(){
+    /** must be called asynchronously **/
+    private void setReviews(){
         reviewAdapter = new ReviewAdapter(this, resultReviews.getResults());
-        reviewView.setAdapter(reviewAdapter);
-        justifyListViewHeightBasedOnChildren(reviewView);
+        reviewList.setAdapter(reviewAdapter);
+        justifyListViewHeightBasedOnChildren(reviewList);
+        if(reviewList.getCount() < 1){
+            reviewTitle.setText(R.string.no_reviews_warning);
+        }
     }
 
     @OnItemClick(R.id.trailer_list_view)
@@ -154,7 +131,10 @@ public class DetailsActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void justifyListViewHeightBasedOnChildren (ListView listView) {
+    /** Calculates the height of a ListView in order to remove
+     * the need of scrolling in that ListView
+     */
+    private void justifyListViewHeightBasedOnChildren (ListView listView) {
 
         ListAdapter adapter = listView.getAdapter();
 
@@ -173,6 +153,32 @@ public class DetailsActivity extends AppCompatActivity {
         par.height = totalHeight + (listView.getDividerHeight() * (adapter.getCount() - 1));
         listView.setLayoutParams(par);
         listView.requestLayout();
+    }
+
+    private class ReviewCallback implements Callback<ResultReviews>{
+        @Override
+        public void onResponse(Call<ResultReviews> call, Response<ResultReviews> response) {
+            resultReviews = response.body();
+            setReviews();
+        }
+
+        @Override
+        public void onFailure(Call<ResultReviews> call, Throwable t) {
+            t.printStackTrace();
+        }
+    }
+
+    private class TrailerCallback implements Callback<ResultVideos>{
+        @Override
+        public void onResponse(Call<ResultVideos> call, Response<ResultVideos> response) {
+            resultVideos = response.body();
+            setVideos();
+        }
+
+        @Override
+        public void onFailure(Call<ResultVideos> call, Throwable t) {
+            t.printStackTrace();
+        }
     }
 
 }

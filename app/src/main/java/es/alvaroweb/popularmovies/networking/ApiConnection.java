@@ -8,10 +8,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.facebook.stetho.okhttp3.StethoInterceptor;
+
 import es.alvaroweb.popularmovies.R;
 import es.alvaroweb.popularmovies.model.ResultMovies;
 import es.alvaroweb.popularmovies.model.ResultReviews;
 import es.alvaroweb.popularmovies.model.ResultVideos;
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
@@ -37,8 +40,13 @@ public class ApiConnection {
 
     private void setConnection() {
         // configure retrofit
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addNetworkInterceptor(new StethoInterceptor())
+                .build();
+
         retrofit = new Retrofit.Builder()
                 .baseUrl(URL_BASE)
+                .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         service = retrofit.create(MovieService.class);

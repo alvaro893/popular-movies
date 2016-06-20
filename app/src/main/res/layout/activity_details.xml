@@ -23,14 +23,39 @@
 
     <include layout="@layout/content_details" />
 
-    <RatingBar
-        android:id="@+id/rating_bar"
-        android:isIndicator="true"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|left"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom|start"
         android:layout_margin="@dimen/fab_margin"
-        android:numStars="5"/>
+        android:background="@drawable/rating_background">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/star_big_off"/>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/rating_text_view"
+            android:textColor="@android:color/white"
+            android:text="7.6"/>
+
+    </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/colorAccent"
+            android:id="@+id/duration_text_view"
+            android:layout_gravity="bottom|center"
+            android:layout_margin="@dimen/fab_margin" />
+
 
     <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
