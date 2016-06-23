@@ -60,7 +60,8 @@
     <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_grade_24dp"
+        android:src="@drawable/ic_start_white_24dp"
+        android:id="@+id/favorite_fab"
         android:layout_gravity="bottom|right"
         android:layout_margin="@dimen/fab_margin"/>
 

@@ -8,15 +8,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 
-import java.util.Date;
-
 /*
  * TODO: Create JavaDoc
  */
 public class TestDatabase extends AndroidTestCase {
 
     void deleteTheDatabase() {
-        mContext.deleteDatabase(FavoriteMoviesDBHelper.DATABASE_NAME);
+        mContext.deleteDatabase(MoviesDBHelper.DATABASE_NAME);
     }
 
 
@@ -26,13 +24,13 @@ public class TestDatabase extends AndroidTestCase {
 
     public void testCreateDb(){
 
-        SQLiteDatabase db = new FavoriteMoviesDBHelper(mContext).getWritableDatabase();
+        SQLiteDatabase db = new MoviesDBHelper(mContext).getWritableDatabase();
         assertEquals(true, db.isOpen());
 
         Cursor c = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
         assertTrue("Error: database not created", c.moveToFirst());
 
-        c = db.rawQuery("PRAGMA table_info(" + FavoriteMoviesContract.MovieEntry.TABLE_NAME + ")",
+        c = db.rawQuery("PRAGMA table_info(" + MoviesContract.MovieEntry.TABLE_NAME + ")",
                 null);
         assertTrue("Error: there is no info",c.moveToFirst());
 
@@ -42,26 +40,26 @@ public class TestDatabase extends AndroidTestCase {
     }
 
     public void testWriteDB(){
-        SQLiteDatabase db = new FavoriteMoviesDBHelper(mContext).getWritableDatabase();
+        SQLiteDatabase db = new MoviesDBHelper(mContext).getWritableDatabase();
         ContentValues testValues = new ContentValues();
 
-        testValues.put(FavoriteMoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE, 23.3);
-        testValues.put(FavoriteMoviesContract.MovieEntry.COLUMN_BACKDROP_PATH, "test/path");
-        testValues.put(FavoriteMoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE, 4.3);
-        testValues.put(FavoriteMoviesContract.MovieEntry.COLUMN_OVERVIEW, "this is a plot");
-        testValues.put(FavoriteMoviesContract.MovieEntry.COLUMN_POSTER_PATH, "test/path/2");
-        testValues.put(FavoriteMoviesContract.MovieEntry.COLUMN_RELEASE_DATE, 1);
-        testValues.put(FavoriteMoviesContract.MovieEntry.COLUMN_TITLE, "testtitle");
+        testValues.put(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE, 23.3);
+        testValues.put(MoviesContract.MovieEntry.COLUMN_BACKDROP_PATH, "test/path");
+        testValues.put(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE, 4.3);
+        testValues.put(MoviesContract.MovieEntry.COLUMN_OVERVIEW, "this is a plot");
+        testValues.put(MoviesContract.MovieEntry.COLUMN_POSTER_PATH, "test/path/2");
+        testValues.put(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE, 1);
+        testValues.put(MoviesContract.MovieEntry.COLUMN_TITLE, "testtitle");
 
         try {
-            long locataionRowId = db.insert(FavoriteMoviesContract.MovieEntry.TABLE_NAME, null, testValues);
+            long locataionRowId = db.insert(MoviesContract.MovieEntry.TABLE_NAME, null, testValues);
         }catch (Exception e){
             e.printStackTrace();
         }
         // check row was inserted
         //assertTrue(locataionRowId != -1);
 
-        Cursor curosr = db.query(FavoriteMoviesContract.MovieEntry.TABLE_NAME,
+        Cursor curosr = db.query(MoviesContract.MovieEntry.TABLE_NAME,
                 null,
                 null,
                 null,

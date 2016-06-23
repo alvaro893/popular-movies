@@ -87,9 +87,13 @@ public class Movie implements Serializable {
      * [1] -> month,
      * [2] -> day
      * */
-    public String[] getReleaseDate() {
+    public String[] getReleaseDateAsArray() {
         String[] date = releaseDate.split("-");
         return date;
+    }
+
+    public String getReleaseDate() {
+        return releaseDate;
     }
 
     public void setReleaseDate(String releaseDate) {

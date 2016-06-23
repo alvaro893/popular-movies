@@ -4,11 +4,17 @@
 
 package es.alvaroweb.popularmovies.details;
 
+import android.support.v4.content.CursorLoader;
 import android.content.Intent;
+import android.support.v4.content.Loader;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.LoaderManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -21,9 +27,12 @@ import java.io.Serializable;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.OnItemClick;
 import es.alvaroweb.popularmovies.R;
+import es.alvaroweb.popularmovies.data.MoviesContract;
 import es.alvaroweb.popularmovies.helpers.LoadImageHelper;
+import es.alvaroweb.popularmovies.helpers.MovieStoreHelper;
 import es.alvaroweb.popularmovies.model.Movie;
 import es.alvaroweb.popularmovies.model.ResultReviews;
 import es.alvaroweb.popularmovies.model.ResultVideos;
@@ -33,7 +42,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /** Shows the details of a Movie after clicking it **/
-public class DetailsActivity extends AppCompatActivity {
+public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private Movie movie;
 
     @BindView(R.id.plot_text_view)  TextView plot;
@@ -45,12 +54,14 @@ public class DetailsActivity extends AppCompatActivity {
     @BindView(R.id.trailer_list_view) ListView trailerList;
     @BindView(R.id.review_list_view) ListView reviewList;
     @BindView(R.id.review_title_text_view) TextView reviewTitle;
+    @BindView(R.id.favorite_fab) FloatingActionButton favoriteButton;
     private ResultVideos resultVideos;
     private VideoAdapter videoAdapter;
     private ReviewAdapter reviewAdapter;
     private ApiConnection apiConnection;
     private ResultReviews resultReviews;
-
+    private static final int FAVORITE_LOADER = 0;
+    private static final String DEBUG_TAG = DetailsActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +80,9 @@ public class DetailsActivity extends AppCompatActivity {
         requestResultVideos();
         requestResultReviews(1);
 
+        // load data from db..
+        getSupportLoaderManager().initLoader(FAVORITE_LOADER, null, this);
+
 
     }
 
@@ -77,11 +91,21 @@ public class DetailsActivity extends AppCompatActivity {
         LoadImageHelper imageHelper = new LoadImageHelper(this);
         title.setText(movie.getTitle());
         plot.setText(movie.getOverview());
-        year.setText(String.format("(%s)", movie.getReleaseDate()[0]));
+        year.setText(String.format("(%s)", movie.getReleaseDateAsArray()[0]));
         rating.setText(String.valueOf(movie.getVoteAverage()));
+
         //duration.setText(movie.getRuntime());
         imageHelper.setImage(backdrop, movie.getBackdropPath() , false);
     }
+
+    private void movieIsFavorite() {
+        favoriteButton.setImageResource(R.drawable.ic_star_yellow_24dp);
+    }
+
+    private void movieIsNotFavorite() {
+        favoriteButton.setImageResource(R.drawable.ic_start_white_24dp);
+    }
+
 
     private void requestResultVideos() {
         apiConnection.getVideos(movie.getId(), new TrailerCallback());
@@ -131,6 +155,12 @@ public class DetailsActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    @OnClick(R.id.favorite_fab)
+    void favoriteButtonClick(View v){
+        MovieStoreHelper storeHelper = new MovieStoreHelper(this);
+        storeHelper.insertMovieorDeleteMovie(movie);
+    }
+
     /** Calculates the height of a ListView in order to remove
      * the need of scrolling in that ListView
      */
@@ -154,6 +184,46 @@ public class DetailsActivity extends AppCompatActivity {
         listView.setLayoutParams(par);
         listView.requestLayout();
     }
+
+    // Loader Callbacks
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int loaderID, Bundle args) {
+        switch (loaderID){
+            case FAVORITE_LOADER:{
+                Uri uri = MoviesContract.MovieEntry.buildMovieUri(movie.getId());
+                String[] projection = new String[]{MoviesContract.MovieEntry._ID};
+                return new CursorLoader(this.getApplicationContext(),
+                        uri,
+                        projection,
+                        null,
+                        null,
+                        null);
+            }
+            default:
+                Log.e(DEBUG_TAG, "Invalid loader id was passed");
+                return null;
+        }
+
+    }
+    /** this callback updates the start button to indicate
+     *  whether the movie is in database or not **/
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if(data.moveToFirst()){
+            movieIsFavorite();
+        }else{
+            movieIsNotFavorite();
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        //Log.d(DEBUG_TAG, "onLoaderReset");
+    }
+
+    // End od Loader Callbacks
+
 
     private class ReviewCallback implements Callback<ResultReviews>{
         @Override
