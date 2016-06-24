@@ -59,6 +59,12 @@ public class MovieProvider extends ContentProvider {
                 cursor = getFavoriteMovie(uri,projection,sortOrder);
                 break;
             }
+            case REVIEWS:{
+                cursor = getReviews(uri,projection,sortOrder);
+            }
+            case VIDEOS:{
+                cursor = getVideos(uri, projection,sortOrder);
+            }
             default:
                 throw new UnsupportedOperationException(UNKNOWN_URI + uri);
         }
@@ -76,6 +82,8 @@ public class MovieProvider extends ContentProvider {
         switch (match){
             case FAVORITE_MOVIE:
                 return MoviesContract.MovieEntry.CONTENT_ITEM_TYPE;
+            case REVIEWS:
+                return MoviesContract.ReviewEntry.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException(UNKNOWN_URI + uri);
         }
@@ -84,23 +92,42 @@ public class MovieProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(Uri uri, ContentValues values) {
+        final String FAILED_MESSAGE = "Failed to insert row into ";
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         Uri returnUri;
-        long id = MoviesContract.MovieEntry.getIdFromUri(uri);
         switch (match) {
             case FAVORITE_MOVIE:{
+                long id = MoviesContract.MovieEntry.getIdFromUri(uri);
                 values.put(MoviesContract.MovieEntry._ID, id);
                 long returnId = db.insert(MoviesContract.MovieEntry.TABLE_NAME, null, values);
                 if (returnId > 0) {
                     returnUri = MoviesContract.MovieEntry.buildMovieUri(returnId);
                 } else {
-                    throw new SQLException("Failed to insert row into" + uri);
+                    throw new SQLException(FAILED_MESSAGE + uri);
+                }
+                break;
+            }
+            case REVIEWS:{
+                long returnId = db.insert(MoviesContract.ReviewEntry.TABLE_NAME, null, values);
+                if(returnId > 0){
+                    returnUri = MoviesContract.ReviewEntry.buildReviewUri(returnId);
+                }else {
+                    throw new SQLException(FAILED_MESSAGE + uri);
+                }
+                break;
+            }
+            case VIDEOS:{
+                long returnId = db.insert(MoviesContract.VideoEntry.TABLE_NAME, null, values);
+                if (returnId > 0) {
+                    returnUri = MoviesContract.VideoEntry.buildVideoUri(returnId);
+                }else{
+                    throw new SQLException(FAILED_MESSAGE + uri);
                 }
                 break;
             }
             default:
-                throw new UnsupportedOperationException("unknown uri: " + uri);
+                throw new UnsupportedOperationException(UNKNOWN_URI + uri);
         }
         getContext().getContentResolver().notifyChange(uri, null);
         return returnUri;
@@ -119,7 +146,7 @@ public class MovieProvider extends ContentProvider {
                 break;
             }
             default:
-                throw new UnsupportedOperationException("unknown uri: " + uri);
+                throw new UnsupportedOperationException(UNKNOWN_URI + uri);
         }
         getContext().getContentResolver().notifyChange(uri, null);
         return rowsDeleted;
@@ -139,7 +166,7 @@ public class MovieProvider extends ContentProvider {
                 break;
             }
             default:
-                throw new UnsupportedOperationException("unknown uri: " + uri);
+                throw new UnsupportedOperationException(UNKNOWN_URI + uri);
         }
         getContext().getContentResolver().notifyChange(uri, null);
         return rowsUpdated;
@@ -158,6 +185,14 @@ public class MovieProvider extends ContentProvider {
                 null,
                 null,
                 sortOrder);
+    }
+
+    private Cursor getVideos(Uri uri, String[] projection, String sortOrder) {
+        return null;
+    }
+
+    private Cursor getReviews(Uri uri, String[] projection, String sortOrder) {
+        return null;
     }
 
 

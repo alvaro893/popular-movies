@@ -13,6 +13,7 @@ import static es.alvaroweb.popularmovies.data.MoviesContract.*;
 public class MoviesDBHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     static final String DATABASE_NAME = "favoritemovies.db";
+    static final String CONFIGURE_FOREIGN_KEYS = "PRAGMA foreign_keys = ON";
 
     public MoviesDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -57,6 +58,12 @@ public class MoviesDBHelper extends SQLiteOpenHelper {
                 TestEntry.COLUMN_TEST + " INTEGER NOT NULL);";
 
         db.execSQL(SQL_CREATE_TEST_TABLE);
+    }
+
+    @Override
+    public void onOpen(SQLiteDatabase db) {
+        super.onOpen(db);
+        db.execSQL(CONFIGURE_FOREIGN_KEYS);
     }
 
     @Override

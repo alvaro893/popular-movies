@@ -63,7 +63,7 @@ public class MoviesContract {
     public final static class ReviewEntry implements BaseColumns{
         /** URI to access this table **/
         public static final Uri CONTENT_URI = URI_CONTENT_BASE.buildUpon()
-                .appendPath(PATH_VIDEO).build();
+                .appendPath(PATH_REVIEW).build();
 
         // Uri types
         public static final String CONTENT_TYPE =
@@ -80,12 +80,15 @@ public class MoviesContract {
         public static Uri buildReviewUri(long id){
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
+        public static Uri buildReviewUri(){
+            return ContentUris.withAppendedId(CONTENT_URI, 0);
+        }
     }
 
     public final static class VideoEntry implements BaseColumns{
         /** URI to access this table **/
         public static final Uri CONTENT_URI = URI_CONTENT_BASE.buildUpon()
-                .appendPath(PATH_REVIEW).build();
+                .appendPath(PATH_VIDEO).build();
 
         // Uri types
         public static final String CONTENT_TYPE =
@@ -101,6 +104,9 @@ public class MoviesContract {
         /** Appends a single id to the CONTENT_URI **/
         public static Uri buildVideoUri(long id){
             return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+        public static Uri buildVideoUri(){
+            return ContentUris.withAppendedId(CONTENT_URI, 0);
         }
     }
 

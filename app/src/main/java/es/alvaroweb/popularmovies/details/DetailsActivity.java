@@ -4,6 +4,7 @@
 
 package es.alvaroweb.popularmovies.details;
 
+import android.os.AsyncTask;
 import android.support.v4.content.CursorLoader;
 import android.content.Intent;
 import android.support.v4.content.Loader;
@@ -62,6 +63,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     private ResultReviews resultReviews;
     private static final int FAVORITE_LOADER = 0;
     private static final String DEBUG_TAG = DetailsActivity.class.getSimpleName();
+    private InsertOrDeleteMovieTask dbTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +85,15 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         // load data from db..
         getSupportLoaderManager().initLoader(FAVORITE_LOADER, null, this);
 
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // avoid memory leaks
+        if(dbTask != null){
+            dbTask.cancel(true);
+        }
     }
 
     private void initializeUiComponents(){
@@ -157,8 +167,8 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     @OnClick(R.id.favorite_fab)
     void favoriteButtonClick(View v){
-        MovieStoreHelper storeHelper = new MovieStoreHelper(this);
-        storeHelper.insertMovieorDeleteMovie(movie);
+        dbTask = new InsertOrDeleteMovieTask();
+        dbTask.execute();
     }
 
     /** Calculates the height of a ListView in order to remove
@@ -224,7 +234,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
 
     // End od Loader Callbacks
 
-
+    
     private class ReviewCallback implements Callback<ResultReviews>{
         @Override
         public void onResponse(Call<ResultReviews> call, Response<ResultReviews> response) {
@@ -248,6 +258,17 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         @Override
         public void onFailure(Call<ResultVideos> call, Throwable t) {
             t.printStackTrace();
+        }
+    }
+    /** It perfoms the task of insert a movie or delete asynchronously, since Cursor loader
+     * are only to do query operations**/
+    private class InsertOrDeleteMovieTask extends AsyncTask<Void, Void, Void>{
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            MovieStoreHelper storeHelper = new MovieStoreHelper(DetailsActivity.this , movie, resultReviews, resultVideos);
+            storeHelper.insertMovieorDeleteMovie();
+            return null;
         }
     }
 
