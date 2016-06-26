@@ -63,6 +63,7 @@ public class MoviesDBHelper extends SQLiteOpenHelper {
     @Override
     public void onOpen(SQLiteDatabase db) {
         super.onOpen(db);
+        // this is necessary for cascade deletion
         db.execSQL(CONFIGURE_FOREIGN_KEYS);
     }
 

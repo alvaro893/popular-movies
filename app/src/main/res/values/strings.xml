@@ -12,4 +12,13 @@
     <string name="SELECTED_MOVIE">selected_movie</string>
     <string name="review_title">Reviews</string>
     <string name="no_reviews_warning">No reviews yet</string>
+    <string name="favorites_title">Favorites</string>
+    <string name="pref_file_key">preferences_file</string>
+    <string name="pref_spinner_option">option</string>
+    <string name="IS_FAVORITE">is_favorite</string>
+    <array name="spinner_options">
+        <item name="spinner_top_rated">Top Rated</item>
+        <item name="spinner_popular">Popular</item>
+        <item name="spinner_top_favorites">Favorites</item>
+    </array>
 </resources>

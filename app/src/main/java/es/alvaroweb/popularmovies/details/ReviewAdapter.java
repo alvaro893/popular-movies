@@ -4,6 +4,7 @@
 package es.alvaroweb.popularmovies.details;
 
 import android.content.Context;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +46,7 @@ public class ReviewAdapter extends ArrayAdapter<ResultReviews.Review>{
             holder = (ViewHolder) convertView.getTag();
         }
         holder.author.setText(review.getAuthor());
-        holder.content.setText(review.getContent());
+        holder.content.setText(Html.fromHtml(review.getContent()));
 
         return convertView;
     }

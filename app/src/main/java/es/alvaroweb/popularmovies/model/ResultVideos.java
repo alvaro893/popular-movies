@@ -3,6 +3,7 @@
  */
 package es.alvaroweb.popularmovies.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -12,6 +13,9 @@ public class ResultVideos {
     long id;
     List<Video> results;
 
+    public ResultVideos() {
+        results = new ArrayList<>();
+    }
 
     public static class Video {
         String key;
@@ -37,6 +41,10 @@ public class ResultVideos {
         public void setSite(String site) {
             this.site = site;
         }
+
+        public void setKey(String key) {
+            this.key = key;
+        }
     }
 
     public long getId() {
@@ -50,6 +58,7 @@ public class ResultVideos {
     public List<Video> getResults() {
         return results;
     }
+
 
     public void setResults(List<Video> results) {
         this.results = results;

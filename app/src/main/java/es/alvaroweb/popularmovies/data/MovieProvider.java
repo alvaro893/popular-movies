@@ -4,7 +4,6 @@
 package es.alvaroweb.popularmovies.data;
 
 import android.content.ContentProvider;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -23,22 +22,26 @@ public class MovieProvider extends ContentProvider {
     private MoviesDBHelper mOpenHelper;
 
     /* Every operation has a integer value to be matched using buildUriMatcher*/
-    static final int FAVORITE_MOVIE = 100;
-    static final int REVIEWS = 300;
-    static final int VIDEOS = 400;
+    static final int MOVIES = 100;
+    static final int FAVORITE_MOVIE = 101;
+    static final int REVIEWS_WITH_MOVIE_ID = 300;
+    static final int VIDEOS_WITH_MOVIE_ID = 400;
 
-    /* helpers for FAVORITE_MOVIE queries */
+    /* sql helpers for queries */
     static final String favoriteSelection = MoviesContract.MovieEntry._ID + " = ?";
-    static final String[] favoriteArgs(long id){
+    static final String[] singleIdSelectionArgs(long id){
         return new String[]{String.valueOf(id)};
     }
+    static final String reviewsSelection = MoviesContract.ReviewEntry.COLUMN_ID_MOVIE + " = ?";
+    static final String videoSelection = MoviesContract.VideoEntry.COLUMN_ID_MOVIE + " = ?";
 
     static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH); // NO_MATCH id for the root to match nothing
         final String authority = MoviesContract.CONTENT_AUTHORITY;
 
-        matcher.addURI(authority, MoviesContract.PATH_REVIEW + "/#", REVIEWS);
-        matcher.addURI(authority, MoviesContract.PATH_VIDEO + "/#", VIDEOS);
+        matcher.addURI(authority, MoviesContract.PATH_MOVIE , MOVIES);
+        matcher.addURI(authority, MoviesContract.PATH_REVIEW + "/#", REVIEWS_WITH_MOVIE_ID);
+        matcher.addURI(authority, MoviesContract.PATH_VIDEO + "/#", VIDEOS_WITH_MOVIE_ID);
         matcher.addURI(authority, MoviesContract.PATH_MOVIE + "/#", FAVORITE_MOVIE);
 
         return matcher;
@@ -55,15 +58,23 @@ public class MovieProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor cursor;
         switch (sUriMatcher.match(uri)){
+            case MOVIES:{
+                SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+                cursor = db.query(MoviesContract.MovieEntry.TABLE_NAME,
+                        projection, selection, selectionArgs, null, null, sortOrder);
+                break;
+            }
             case FAVORITE_MOVIE:{
                 cursor = getFavoriteMovie(uri,projection,sortOrder);
                 break;
             }
-            case REVIEWS:{
+            case REVIEWS_WITH_MOVIE_ID:{
                 cursor = getReviews(uri,projection,sortOrder);
+                break;
             }
-            case VIDEOS:{
+            case VIDEOS_WITH_MOVIE_ID:{
                 cursor = getVideos(uri, projection,sortOrder);
+                break;
             }
             default:
                 throw new UnsupportedOperationException(UNKNOWN_URI + uri);
@@ -80,9 +91,11 @@ public class MovieProvider extends ContentProvider {
     public String getType(Uri uri) {
         final int match = sUriMatcher.match(uri);
         switch (match){
+            case MOVIES:
+                return MoviesContract.MovieEntry.CONTENT_TYPE;
             case FAVORITE_MOVIE:
                 return MoviesContract.MovieEntry.CONTENT_ITEM_TYPE;
-            case REVIEWS:
+            case REVIEWS_WITH_MOVIE_ID:
                 return MoviesContract.ReviewEntry.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException(UNKNOWN_URI + uri);
@@ -108,7 +121,7 @@ public class MovieProvider extends ContentProvider {
                 }
                 break;
             }
-            case REVIEWS:{
+            case REVIEWS_WITH_MOVIE_ID:{
                 long returnId = db.insert(MoviesContract.ReviewEntry.TABLE_NAME, null, values);
                 if(returnId > 0){
                     returnUri = MoviesContract.ReviewEntry.buildReviewUri(returnId);
@@ -117,7 +130,7 @@ public class MovieProvider extends ContentProvider {
                 }
                 break;
             }
-            case VIDEOS:{
+            case VIDEOS_WITH_MOVIE_ID:{
                 long returnId = db.insert(MoviesContract.VideoEntry.TABLE_NAME, null, values);
                 if (returnId > 0) {
                     returnUri = MoviesContract.VideoEntry.buildVideoUri(returnId);
@@ -142,7 +155,7 @@ public class MovieProvider extends ContentProvider {
             case FAVORITE_MOVIE:{
                 rowsDeleted = db.delete(MoviesContract.MovieEntry.TABLE_NAME,
                         favoriteSelection,
-                        favoriteArgs(id));
+                        singleIdSelectionArgs(id));
                 break;
             }
             default:
@@ -162,7 +175,7 @@ public class MovieProvider extends ContentProvider {
                 rowsUpdated = db.update(MoviesContract.MovieEntry.TABLE_NAME,
                         values,
                         favoriteSelection,
-                        favoriteArgs(id));
+                        singleIdSelectionArgs(id));
                 break;
             }
             default:
@@ -181,18 +194,34 @@ public class MovieProvider extends ContentProvider {
                 MoviesContract.MovieEntry.TABLE_NAME,
                 projection,
                 favoriteSelection,
-                favoriteArgs(id),
+                singleIdSelectionArgs(id),
                 null,
                 null,
                 sortOrder);
     }
 
     private Cursor getVideos(Uri uri, String[] projection, String sortOrder) {
-        return null;
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        long movieId = MoviesContract.VideoEntry.getIdFromUri(uri);
+        return db.query(MoviesContract.VideoEntry.TABLE_NAME,
+                projection,
+                videoSelection,
+                singleIdSelectionArgs(movieId),
+                null,
+                null,
+                sortOrder);
     }
 
     private Cursor getReviews(Uri uri, String[] projection, String sortOrder) {
-        return null;
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        long movieId = MoviesContract.ReviewEntry.getIdFromUri(uri);
+        return db.query(MoviesContract.ReviewEntry.TABLE_NAME,
+                projection,
+                reviewsSelection,
+                singleIdSelectionArgs(movieId),
+                null,
+                null,
+                sortOrder);
     }
 
 

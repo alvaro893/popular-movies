@@ -4,7 +4,12 @@
 package es.alvaroweb.popularmovies.moviesgrid;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -13,29 +18,40 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Spinner;
+
+import java.util.ArrayList;
+
+import butterknife.BindArray;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnItemClick;
+import butterknife.OnItemSelected;
 import es.alvaroweb.popularmovies.R;
+import es.alvaroweb.popularmovies.data.MoviesContract;
 import es.alvaroweb.popularmovies.details.DetailsActivity;
+import es.alvaroweb.popularmovies.helpers.PreferencesHelper;
 import es.alvaroweb.popularmovies.model.Movie;
 import es.alvaroweb.popularmovies.model.ResultMovies;
-import es.alvaroweb.popularmovies.model.ResultVideos;
 import es.alvaroweb.popularmovies.networking.ApiConnection;
 import es.alvaroweb.popularmovies.settings.SettingsActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String DEBUG_TAG = MainActivity.class.getSimpleName();
+    private static final int FAVORITE_LOADER = 0;
+    private static final int DEFAULT_PAGE = 1;
+    @BindView(R.id.movies_grid_view) GridView moviesGridView;
+    @BindView(R.id.spinner) Spinner spinner;
+    @BindArray(R.array.spinner_options) String[] spinnerOptions;
     private ResultMovies resultMovies;
     private MoviesAdapter moviesAdapter;
     private ApiConnection apiConnection;
-    @BindView(R.id.movies_grid_view) GridView moviesGridView;
-
+    private boolean isFavorite = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,23 +60,10 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ButterKnife.bind(this);
+        setSpinner();
 
         // Get data
-        getResultMovies(1);
-        //delete this
-        apiConnection.getVideos(550, new Callback<ResultVideos>() {
-            @Override
-            public void onResponse(Call<ResultVideos> call, Response<ResultVideos> response) {
-                ResultVideos resultVideos = response.body();
-                ResultVideos.Video video = resultVideos.getResults().get(0);
-                Log.d(DEBUG_TAG, video.getName());
-            }
-
-            @Override
-            public void onFailure(Call<ResultVideos> call, Throwable t) {
-
-            }
-        });
+        //getResultMovies(DEFAULT_PAGE);
     }
 
     @Override
@@ -86,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
+    /** attaches the fetch results to the grid. NOTE: must be called asynchronously **/
     private void setGridOfMovies() {
         moviesAdapter = new MoviesAdapter(this, resultMovies.getResults());
         moviesGridView.setAdapter(moviesAdapter);
@@ -126,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intentDetailActivity = new Intent(this, DetailsActivity.class);
 
         intentDetailActivity.putExtra(getString(R.string.SELECTED_MOVIE), selectedMovie);
+        intentDetailActivity.putExtra(getString(R.string.IS_FAVORITE), isFavorite);
         startActivity(intentDetailActivity);
     }
 
@@ -139,5 +143,82 @@ public class MainActivity extends AppCompatActivity {
         paginate(v);
     }
 
+    @OnItemSelected(R.id.spinner)
+    void clickSpinnerItem(AdapterView<?> parent, View view, int pos, long id){
+        switch (pos){
+            case PreferencesHelper.TOP_SELECTION:
+                PreferencesHelper.setSpinnerOption(PreferencesHelper.TOP_SELECTION, this);
+                getResultMovies(DEFAULT_PAGE);
+                setTitle(getString(R.string.top_rated_title));
+                break;
+            case PreferencesHelper.POPULAR_SELECTION:
+                PreferencesHelper.setSpinnerOption(PreferencesHelper.POPULAR_SELECTION, this);
+                getResultMovies(DEFAULT_PAGE);
+                setTitle(getString(R.string.app_name));
+                break;
+            case PreferencesHelper.FAVORITE_SELECTION:
+                PreferencesHelper.setSpinnerOption(PreferencesHelper.FAVORITE_SELECTION, this);
+                getSupportLoaderManager().initLoader(FAVORITE_LOADER, null, this);
+                break;
+            default:
+                break;
+        }
+    }
 
+    private void setSpinner(){
+        SpinnerAdapter adapter = new SpinnerAdapter(this,
+                android.R.layout.simple_spinner_item,
+                spinnerOptions);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setSelection(PreferencesHelper.readSpinnerOption(this));
+    }
+
+    @Override
+    public Loader onCreateLoader(int id, Bundle args) {
+        switch (id){
+            case FAVORITE_LOADER:{
+                Uri uri = MoviesContract.MovieEntry.buildMovieUri();
+                Log.d(DEBUG_TAG, "uri: " + uri);
+                setTitle(getString(R.string.favorites_title));
+                return new CursorLoader(this, uri, null, null, null, null);
+            }
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader loader, Cursor data) {
+        setMoviesFromDb(data);
+        setGridOfMovies();
+        isFavorite = true;
+    }
+
+    @Override
+    public void onLoaderReset(Loader loader) {
+
+    }
+    // call it asynchronously
+    public void setMoviesFromDb(Cursor cursor) {
+        if(cursor.moveToFirst()){
+            resultMovies = new ResultMovies();
+            ArrayList<Movie> list = new ArrayList<>();
+            do{
+                Movie movie = new Movie();
+                movie.setId(cursor.getLong(cursor.getColumnIndex(MoviesContract.MovieEntry._ID)));
+                movie.setTitle(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_TITLE)));
+                movie.setPopularity(cursor.getDouble(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_POPULARITY)));
+                movie.setBackdropPath(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_BACKDROP_PATH)));
+                movie.setOverview(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_OVERVIEW)));
+                movie.setPosterPath(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_POSTER_PATH)));
+                movie.setReleaseDate(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE)));
+                movie.setVoteAverage(cursor.getInt(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE)));
+                list.add(movie);
+            }while (cursor.moveToNext());
+            resultMovies.setResults(list);
+        }else{
+            return;
+        }
+    }
 }

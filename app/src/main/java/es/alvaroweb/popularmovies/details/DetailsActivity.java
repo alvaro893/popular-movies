@@ -25,6 +25,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -44,25 +45,26 @@ import retrofit2.Response;
 
 /** Shows the details of a Movie after clicking it **/
 public class DetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
-    private Movie movie;
 
+    private static final int FAVORITE_LOADER = 0;
+    private static final String DEBUG_TAG = DetailsActivity.class.getSimpleName();
+    private static final int REVIEWS_LOADER = 1;
+    private static final int VIDEOS_LOADER = 2;
     @BindView(R.id.plot_text_view)  TextView plot;
     @BindView(R.id.year_text_view) TextView year;
     @BindView(R.id.back_drop_image) ImageView backdrop;
     @BindView(R.id.title_text_view) TextView title;
-    //@BindView(R.id.duration_text_view) TextView duration;
     @BindView(R.id.rating_text_view) TextView rating;
     @BindView(R.id.trailer_list_view) ListView trailerList;
-    @BindView(R.id.review_list_view) ListView reviewList;
+    @BindView(R.id.review_list_view) ListView reviewListView;
     @BindView(R.id.review_title_text_view) TextView reviewTitle;
     @BindView(R.id.favorite_fab) FloatingActionButton favoriteButton;
+    private Movie movie;
     private ResultVideos resultVideos;
     private VideoAdapter videoAdapter;
     private ReviewAdapter reviewAdapter;
     private ApiConnection apiConnection;
     private ResultReviews resultReviews;
-    private static final int FAVORITE_LOADER = 0;
-    private static final String DEBUG_TAG = DetailsActivity.class.getSimpleName();
     private InsertOrDeleteMovieTask dbTask;
 
     @Override
@@ -77,14 +79,22 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         initializeUiComponents();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // network tasks
-        apiConnection = new ApiConnection(this);
-        requestResultVideos();
-        requestResultReviews(1);
+        networkAndDatabaseTasks();
+    }
 
-        // load data from db..
+    private void networkAndDatabaseTasks() {
+        boolean isFavorite = getIntent().getBooleanExtra(getString(R.string.IS_FAVORITE), false);
+        if(isFavorite){
+            getSupportLoaderManager().initLoader(REVIEWS_LOADER,null,this);
+            getSupportLoaderManager().initLoader(VIDEOS_LOADER,null,this);
+        }else{
+            apiConnection = new ApiConnection(this);
+            requestResultVideos();
+            requestResultReviews(1);
+        }
+
+        // this loader will check if the movie is a favorite
         getSupportLoaderManager().initLoader(FAVORITE_LOADER, null, this);
-
     }
 
     @Override
@@ -142,11 +152,11 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     /** must be called asynchronously **/
     private void setReviews(){
         reviewAdapter = new ReviewAdapter(this, resultReviews.getResults());
-        reviewList.setAdapter(reviewAdapter);
-        justifyListViewHeightBasedOnChildren(reviewList);
-        if(reviewList.getCount() < 1){
+        reviewListView.setAdapter(reviewAdapter);
+        if(reviewListView.getCount() < 1){
             reviewTitle.setText(R.string.no_reviews_warning);
         }
+        justifyListViewHeightBasedOnChildren(reviewListView);
     }
 
     @OnItemClick(R.id.trailer_list_view)
@@ -158,7 +168,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                 uri = Uri.parse("http://youtube.com/watch?v=" + trailer.getKey());
                 break;
             default:
-                throw new UnsupportedOperationException("no valid site");
+                throw new UnsupportedOperationException("no valid site " + trailer.getSite());
         }
 
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
@@ -190,7 +200,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
         }
 
         ViewGroup.LayoutParams par = listView.getLayoutParams();
-        par.height = totalHeight + (listView.getDividerHeight() * (adapter.getCount() - 1));
+        par.height = totalHeight * 3;// + (listView.getDividerHeight() * (adapter.getCount() - 1));
         listView.setLayoutParams(par);
         listView.requestLayout();
     }
@@ -200,6 +210,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
     @Override
     public Loader<Cursor> onCreateLoader(int loaderID, Bundle args) {
         switch (loaderID){
+            //this is loader is to get visual feedback whether the movie is favorite
             case FAVORITE_LOADER:{
                 Uri uri = MoviesContract.MovieEntry.buildMovieUri(movie.getId());
                 String[] projection = new String[]{MoviesContract.MovieEntry._ID};
@@ -209,6 +220,18 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
                         null,
                         null,
                         null);
+            }
+            case REVIEWS_LOADER:{
+                Uri uri = MoviesContract.ReviewEntry.buildReviewUri(movie.getId());
+                return new CursorLoader(this.getApplicationContext(),
+                        uri,
+                        null,null,null,null);
+            }
+            case VIDEOS_LOADER:{
+                Uri uri = MoviesContract.VideoEntry.buildVideoUri(movie.getId());
+                return  new CursorLoader(this.getApplicationContext(),
+                        uri,
+                        null, null, null, null);
             }
             default:
                 Log.e(DEBUG_TAG, "Invalid loader id was passed");
@@ -220,10 +243,48 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
      *  whether the movie is in database or not **/
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        switch (loader.getId()){
+            case FAVORITE_LOADER:
+                if(data.moveToFirst()){
+                    movieIsFavorite();
+                }else{
+                    movieIsNotFavorite();
+                }
+                break;
+            case REVIEWS_LOADER:
+                setReviewsFromDb(data);
+                setReviews();
+                break;
+            case VIDEOS_LOADER:
+                setVideosFromDb(data);
+                setVideos();
+                break;
+        }
+    }
+
+    private void setVideosFromDb(Cursor data) {
+        resultVideos = new ResultVideos();
         if(data.moveToFirst()){
-            movieIsFavorite();
-        }else{
-            movieIsNotFavorite();
+            do{
+                ResultVideos.Video video = new ResultVideos.Video();
+                video.setName(data.getString(data.getColumnIndex(MoviesContract.VideoEntry.COLUMN_NAME)));
+                video.setSite(data.getString(data.getColumnIndex(MoviesContract.VideoEntry.COLUMN_SITE)));
+                video.setKey(data.getString(data.getColumnIndex(MoviesContract.VideoEntry.COLUMN_KEY)));
+                resultVideos.getResults().add(video);
+            }while (data.moveToNext());
+
+        }
+    }
+
+    private void setReviewsFromDb(Cursor data) {
+        resultReviews = new ResultReviews();
+        if(data.moveToFirst()){
+            do{
+                ResultReviews.Review review = new ResultReviews.Review();
+                review.setAuthor(data.getString(data.getColumnIndex(MoviesContract.ReviewEntry.COLUMN_AUTHOR)));
+                review.setContent(data.getString(data.getColumnIndex(MoviesContract.ReviewEntry.COLUMN_CONTENT)));
+                resultReviews.getResults().add(review);
+            }while (data.moveToNext());
         }
     }
 
@@ -260,6 +321,7 @@ public class DetailsActivity extends AppCompatActivity implements LoaderManager.
             t.printStackTrace();
         }
     }
+
     /** It perfoms the task of insert a movie or delete asynchronously, since Cursor loader
      * are only to do query operations**/
     private class InsertOrDeleteMovieTask extends AsyncTask<Void, Void, Void>{

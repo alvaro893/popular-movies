@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 
 import es.alvaroweb.popularmovies.R;
+import es.alvaroweb.popularmovies.helpers.PreferencesHelper;
 import es.alvaroweb.popularmovies.model.ResultMovies;
 import es.alvaroweb.popularmovies.model.ResultReviews;
 import es.alvaroweb.popularmovies.model.ResultVideos;
@@ -85,15 +86,8 @@ public class ApiConnection {
     }
 
     private boolean isPopularMoviesSetting() {
-
-        String key = context.getString(R.string.pref_by_popular_key);
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean isPopularSetting = preferences.getBoolean(key, true);
-        // change activity title
-        if (!isPopularSetting) {
-            String title = context.getString(R.string.top_rated_title);
-            ((Activity) context).setTitle(title);
-        }
-        return isPopularSetting;
+        boolean isPopular = PreferencesHelper.readSpinnerOption(context) ==
+                PreferencesHelper.POPULAR_SELECTION;
+        return isPopular;
     }
 }

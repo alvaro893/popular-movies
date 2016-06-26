@@ -16,4 +16,6 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="content......"
         android:id="@+id/review_content_text_view" />
+
+
 </LinearLayout>

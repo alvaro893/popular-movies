@@ -55,6 +55,10 @@ public class MoviesContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
+        public static Uri buildMovieUri() {
+            return CONTENT_URI;
+        }
+
         public static long getIdFromUri(Uri uri) {
             return Long.parseLong(uri.getPathSegments().get(1));
         }
@@ -77,11 +81,15 @@ public class MoviesContract {
         public static final String COLUMN_ID_MOVIE ="id_movie";
 
         /** Appends a single id to the CONTENT_URI **/
-        public static Uri buildReviewUri(long id){
-            return ContentUris.withAppendedId(CONTENT_URI, id);
+        public static Uri buildReviewUri(long movieId){
+            return ContentUris.withAppendedId(CONTENT_URI, movieId);
         }
         public static Uri buildReviewUri(){
             return ContentUris.withAppendedId(CONTENT_URI, 0);
+        }
+
+        public static long getIdFromUri(Uri uri) {
+            return Long.parseLong(uri.getPathSegments().get(1));
         }
     }
 
@@ -102,11 +110,15 @@ public class MoviesContract {
         public static final String COLUMN_SITE = "site";
         public static final String COLUMN_ID_MOVIE = "id_movie";
         /** Appends a single id to the CONTENT_URI **/
-        public static Uri buildVideoUri(long id){
-            return ContentUris.withAppendedId(CONTENT_URI, id);
+        public static Uri buildVideoUri(long movieId){
+            return ContentUris.withAppendedId(CONTENT_URI, movieId);
         }
         public static Uri buildVideoUri(){
             return ContentUris.withAppendedId(CONTENT_URI, 0);
+        }
+
+        public static long getIdFromUri(Uri uri) {
+            return Long.parseLong(uri.getPathSegments().get(1));
         }
     }
 
