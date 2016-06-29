@@ -5,6 +5,7 @@ package es.alvaroweb.popularmovies.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -18,6 +19,10 @@ public class ResultMovies {
     int totalResults;
     @SerializedName("total_pages")
     int totalPages;
+
+    public ResultMovies() {
+        results = new ArrayList<>();
+    }
 
     public int getPage() {
         return page;

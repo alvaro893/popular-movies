@@ -1,19 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    <fragment
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
 
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".moviesgrid.MainActivity"
-    tools:showIn="@layout/activity_main">
-
-    <GridView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/movies_grid_view"
-        android:numColumns="@integer/movie_thumbnail_columns"
-        />
+        android:name="es.alvaroweb.popularmovies.moviesgrid.GridFragment"
+        android:id="@+id/static_grid_fragment"
+        tools:showIn="@layout/activity_main"
+        tools:layout="@layout/fragment_grid" />
 
-</FrameLayout>
