@@ -179,6 +179,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         apiConnection.getReviews(movie.getId(), page, new ReviewCallback());
     }
 
+
+    private void showFavoriteButton() {
+        favoriteButton.setVisibility(View.VISIBLE);
+    }
+
     /** get the selected movie by the user from arguments **/
     private void getFragmentArguments(){
         Bundle extras = getArguments();
@@ -276,6 +281,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             case REVIEWS_LOADER:
                 setReviewsFromDb(data);
                 setReviews();
+                showFavoriteButton();
                 break;
             case VIDEOS_LOADER:
                 setVideosFromDb(data);
@@ -283,6 +289,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 break;
         }
     }
+
 
     private void setVideosFromDb(Cursor data) {
         resultVideos = new ResultVideos();
@@ -323,6 +330,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         public void onResponse(Call<ResultReviews> call, Response<ResultReviews> response) {
             resultReviews = response.body();
             setReviews();
+            showFavoriteButton();
         }
 
         @Override

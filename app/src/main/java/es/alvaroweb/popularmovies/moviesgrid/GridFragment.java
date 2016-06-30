@@ -29,6 +29,7 @@ import es.alvaroweb.popularmovies.R;
 import es.alvaroweb.popularmovies.data.MoviesContract;
 import es.alvaroweb.popularmovies.details.DetailFragment;
 import es.alvaroweb.popularmovies.details.DetailsActivity;
+import es.alvaroweb.popularmovies.helpers.PreferencesHelper;
 import es.alvaroweb.popularmovies.model.Movie;
 import es.alvaroweb.popularmovies.model.ResultMovies;
 import es.alvaroweb.popularmovies.networking.ApiConnection;
@@ -108,6 +109,11 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onLoadFinished(Loader loader, Cursor data) {
+        // get out of the method if the favorite option was not selected
+        final int CURRENT_OPTION = PreferencesHelper.readSpinnerOption(getActivity());
+        if(CURRENT_OPTION != PreferencesHelper.FAVORITE_SELECTION){
+            return;
+        }
         setMoviesFromDb(data);
         setGridOfMovies();
         isFavorite = true;
@@ -132,7 +138,7 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
                 movie.setOverview(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_OVERVIEW)));
                 movie.setPosterPath(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_POSTER_PATH)));
                 movie.setReleaseDate(cursor.getString(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_RELEASE_DATE)));
-                movie.setVoteAverage(cursor.getInt(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE)));
+                movie.setVoteAverage(cursor.getFloat(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE)));
                 list.add(movie);
             } while (cursor.moveToNext());
             resultMovies.setResults(list);
