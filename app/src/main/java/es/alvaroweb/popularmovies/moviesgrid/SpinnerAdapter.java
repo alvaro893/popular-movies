@@ -10,13 +10,14 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 /*
- * TODO: Create JavaDoc
+ *  It customizes the Spinner in MainActivity
  */
 public class SpinnerAdapter extends ArrayAdapter<String> {
     public SpinnerAdapter(Context context, int resource, String[] strArray) {
         super(context, resource, strArray);
     }
 
+    /** this is basically to delete the spinner title*/
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = super.getView(position, convertView, parent);
@@ -24,4 +25,5 @@ public class SpinnerAdapter extends ArrayAdapter<String> {
         textView.setText("");
         return view;
     }
+
 }

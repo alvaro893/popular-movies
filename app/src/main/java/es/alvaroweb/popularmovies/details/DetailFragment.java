@@ -11,17 +11,20 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.Serializable;
+import java.util.zip.Inflater;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -50,28 +53,23 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private static final int DEFAULT_PAGE = 1;
     private static final String DEBUG_TAG = DetailFragment.class.getSimpleName();
     public static final String IS_FAVORITE_ARG = "is favorite";
-    @BindView(R.id.plot_text_view)
-    TextView plot;
+    @BindView(R.id.plot_text_view) TextView plot;
     @BindView(R.id.year_text_view) TextView year;
-    @BindView(R.id.back_drop_image)
-    ImageView backdrop;
+    @BindView(R.id.back_drop_image)ImageView backdrop;
     @BindView(R.id.title_text_view) TextView title;
     @BindView(R.id.rating_text_view) TextView rating;
-    @BindView(R.id.trailer_list_view)
-    ListView trailerList;
-    @BindView(R.id.review_list_view) ListView reviewListView;
     @BindView(R.id.review_title_text_view) TextView reviewTitle;
-    @BindView(R.id.favorite_fab)
-    FloatingActionButton favoriteButton;
-    private Movie movie;
+    @BindView(R.id.favorite_fab) FloatingActionButton favoriteButton;
+    @BindView(R.id.review_linear_layout) LinearLayout reviewContainer;
+    @BindView(R.id.videos_linear_layout) LinearLayout videosContainer;
+    Movie movie;
     private ResultVideos resultVideos;
-    private VideoAdapter videoAdapter;
-    private ReviewAdapter reviewAdapter;
     private ApiConnection apiConnection;
     private ResultReviews resultReviews;
     private InsertOrDeleteMovieTask dbTask;
     private FragmentActivity activity;
     private boolean isFavorite = false;
+    private View viewRoot;
 
 
     public DetailFragment() {
@@ -83,11 +81,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();
-
         getFragmentArguments();
-        activity.setTitle(movie.getTitle());
-
-
         networkAndDatabaseTasks();
     }
 
@@ -95,8 +89,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view =  inflater.inflate(R.layout.fragment_detail, container, false);
-        ButterKnife.bind(this, view);
+        viewRoot =  inflater.inflate(R.layout.fragment_detail, container, false);
+        ButterKnife.bind(this, viewRoot);
         LoadImageHelper imageHelper = new LoadImageHelper(activity);
         title.setText(movie.getTitle());
         plot.setText(movie.getOverview());
@@ -104,7 +98,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         rating.setText(String.valueOf(movie.getVoteAverage()));
 
         imageHelper.setImage(backdrop, movie.getBackdropPath() , false);
-        return view;
+        return viewRoot;
     }
 
     @Override
@@ -128,6 +122,43 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         // this loader will check if the movie is a favorite
         getLoaderManager().initLoader(FAVORITE_LOADER, null, this);
+    }
+    /** creates a review and adds it the review section **/
+    private void addReview(ResultReviews.Review review){
+        LinearLayout reviewView = (LinearLayout) LayoutInflater
+                .from(activity)
+                .inflate(R.layout.review_row_layout, reviewContainer, false);
+        TextView auth = (TextView) reviewView.findViewById(R.id.review_author_text_view);
+        TextView content = (TextView) reviewView.findViewById(R.id.review_content_text_view);
+
+        auth.setText(review.getAuthor());
+        content.setText((review.getContent()));
+
+        reviewContainer.addView(reviewView);
+    }
+
+    private void addVideo(ResultVideos.Video video){
+        LinearLayout videoView = (LinearLayout) LayoutInflater
+                .from(activity)
+                .inflate(R.layout.trailer_row_layout, videosContainer, false);
+
+        TextView name = (TextView) videoView.findViewById(R.id.trailer_text_view);
+        TextView site = (TextView) videoView.findViewById(R.id.source_trailer_text_view);
+
+        name.setText(video.getName());
+        site.setText(video.getSite());
+
+        int index = resultVideos.getResults().indexOf(video);
+        videoView.setTag(index);
+        videoView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int index = (int) v.getTag();
+                trailerClick(index);
+            }
+        });
+
+        videosContainer.addView(videoView);
     }
 
 
@@ -158,23 +189,24 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     /** must be called asynchronously **/
     private void setVideos(){
-        videoAdapter = new VideoAdapter(activity, resultVideos.getResults());
-        trailerList.setAdapter(videoAdapter);
-        justifyListViewHeightBasedOnChildren(trailerList);
+        for(ResultVideos.Video v: resultVideos.getResults()){
+            addVideo(v);
+        }
     }
 
     /** must be called asynchronously **/
     private void setReviews(){
-        reviewAdapter = new ReviewAdapter(activity, resultReviews.getResults());
-        reviewListView.setAdapter(reviewAdapter);
-        if(reviewListView.getCount() < 1){
+        Log.d(DEBUG_TAG, "reviews:"+resultReviews.getResults().size());
+        for(ResultReviews.Review r: resultReviews.getResults()){
+            addReview(r);
+        }
+
+        if(resultReviews.getResults().size() <= 0){
             reviewTitle.setText(R.string.no_reviews_warning);
         }
-        justifyListViewHeightBasedOnChildren(reviewListView);
     }
 
-    @OnItemClick(R.id.trailer_list_view)
-    void trailerClick(AdapterView<?> parent, View view, int position, long id){
+    void trailerClick(int position){
         ResultVideos.Video trailer = resultVideos.getResults().get(position);
         Uri uri;
         switch (trailer.getSite()){
@@ -195,32 +227,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         dbTask.execute();
     }
 
-    /** Calculates the height of a ListView in order to remove
-     * the need of scrolling in that ListView
-     */
-    private void justifyListViewHeightBasedOnChildren (ListView listView) {
-
-        ListAdapter adapter = listView.getAdapter();
-
-        if (adapter == null) {
-            return;
-        }
-        ViewGroup vg = listView;
-        int totalHeight = 0;
-        for (int i = 0; i < adapter.getCount(); i++) {
-            View listItem = adapter.getView(i, null, vg);
-            listItem.measure(0, 0);
-            totalHeight += listItem.getMeasuredHeight();
-        }
-
-        ViewGroup.LayoutParams par = listView.getLayoutParams();
-        par.height = totalHeight * 3;// + (listView.getDividerHeight() * (adapter.getCount() - 1));
-        listView.setLayoutParams(par);
-        listView.requestLayout();
-    }
 
     // Loader Callbacks
-
     @Override
     public Loader<Cursor> onCreateLoader(int loaderID, Bundle args) {
         switch (loaderID){

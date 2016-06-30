@@ -4,7 +4,9 @@
 package es.alvaroweb.popularmovies.moviesgrid;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -18,6 +20,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnItemSelected;
 import es.alvaroweb.popularmovies.R;
+import es.alvaroweb.popularmovies.data.MoviesContract;
+import es.alvaroweb.popularmovies.data.MoviesDBHelper;
 import es.alvaroweb.popularmovies.details.DetailFragment;
 import es.alvaroweb.popularmovies.details.DetailsActivity;
 import es.alvaroweb.popularmovies.helpers.PreferencesHelper;
@@ -47,6 +51,9 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
 
         if(findViewById(R.id.detail_fragment_container) != null){
             isTwoPaneLayout = true;
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.detail_fragment_container, new EmptyFragment())
+                    .commit();
         }
 
     }
@@ -60,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.detail_fragment_container, fragment)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit();
     }
 
@@ -72,18 +80,18 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            Intent intentSettings = new Intent(this, SettingsActivity.class);
-            startActivity(intentSettings);
-            return true;
+        switch (id){
+            case R.id.action_settings:
+                Intent intentSettings = new Intent(this, SettingsActivity.class);
+                startActivity(intentSettings);
+                return true;
+            case R.id.action_delete_favorites:
+                Uri uri = MoviesContract.MovieEntry.buildMovieUri();
+                getContentResolver().delete(uri, null, null);
+                return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -103,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
             case PreferencesHelper.FAVORITE_SELECTION:
                 PreferencesHelper.setSpinnerOption(PreferencesHelper.FAVORITE_SELECTION, this);
                 gridFragment.fetchMoviesFromDb();
+                setTitle(getString(R.string.favorites_title));
                 break;
             default:
                 break;
@@ -113,7 +122,8 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
         SpinnerAdapter adapter = new SpinnerAdapter(this,
                 android.R.layout.simple_spinner_item,
                 spinnerOptions);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // the styles of every spinner line are applied within the setDropDownViewResource
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinner.setAdapter(adapter);
         spinner.setSelection(PreferencesHelper.readSpinnerOption(this));
     }

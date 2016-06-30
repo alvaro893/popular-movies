@@ -58,6 +58,8 @@ public class DetailsActivity extends AppCompatActivity  {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        setTitle(getString(R.string.activity_details_title));
+
         if(savedInstanceState == null){
             addFragmentDetail();
         }
@@ -72,7 +74,6 @@ public class DetailsActivity extends AppCompatActivity  {
 
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.detail_fragment_container, fragment)
-                .addToBackStack(null)
                 .commit();
     }
 

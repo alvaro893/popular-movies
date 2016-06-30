@@ -150,12 +150,19 @@ public class MovieProvider extends ContentProvider {
     public int delete(Uri uri, String selection, String[] selectionArgs) {
        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         int rowsDeleted;
-        long id = MoviesContract.MovieEntry.getIdFromUri(uri);
+
         switch (sUriMatcher.match(uri)){
             case FAVORITE_MOVIE:{
+                long id = MoviesContract.MovieEntry.getIdFromUri(uri);
                 rowsDeleted = db.delete(MoviesContract.MovieEntry.TABLE_NAME,
                         favoriteSelection,
                         singleIdSelectionArgs(id));
+                break;
+            }
+            case MOVIES:{
+                rowsDeleted = db.delete(MoviesContract.MovieEntry.TABLE_NAME,
+                        selection,
+                        selectionArgs);
                 break;
             }
             default:
