@@ -3,10 +3,7 @@
  */
 package es.alvaroweb.popularmovies.networking;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 
@@ -28,29 +25,28 @@ public class ApiConnection {
     private final static String URL_BASE = "https://api.themoviedb.org/";
     private final static String OPTION_POPULAR = "popular";
     private final static String OPTION_TOP_RATED = "top_rated";
-    private MovieService service;
-    private Retrofit retrofit;
-    private Context context;
     private final String API_KEY;
+    private MovieService mService;
+    private Context mContext;
 
     public ApiConnection(Context context) {
-        this.context = context;
+        this.mContext = context;
         API_KEY = context.getString(R.string.API_KEY);
         setConnection();
     }
 
     private void setConnection() {
-        // configure retrofit
+        // configure mRetrofit
         OkHttpClient client = new OkHttpClient.Builder()
                 .addNetworkInterceptor(new StethoInterceptor())
                 .build();
 
-        retrofit = new Retrofit.Builder()
+        Retrofit mRetrofit = new Retrofit.Builder()
                 .baseUrl(URL_BASE)
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        service = retrofit.create(MovieService.class);
+        mService = mRetrofit.create(MovieService.class);
     }
 
     /**
@@ -64,29 +60,29 @@ public class ApiConnection {
         Call<ResultMovies> moviesCall;
 
         if (isPopularMoviesSetting()) {
-            moviesCall = service.getMovies(OPTION_POPULAR, API_KEY, page);
+            moviesCall = mService.getMovies(OPTION_POPULAR, API_KEY, page);
         } else {
-            moviesCall = service.getMovies(OPTION_TOP_RATED, API_KEY, page);
+            moviesCall = mService.getMovies(OPTION_TOP_RATED, API_KEY, page);
         }
 
         // asynchronous call
         moviesCall.enqueue(moviesCallback);
     }
 
-    public void getVideos(long movieId, Callback<ResultVideos> videosCallback){
+    public void getVideos(long movieId, Callback<ResultVideos> videosCallback) {
         Call<ResultVideos> videosCall;
-        videosCall = service.getVideos(movieId, API_KEY);
+        videosCall = mService.getVideos(movieId, API_KEY);
         videosCall.enqueue(videosCallback);
     }
 
-    public void getReviews(long movieId, int page, Callback<ResultReviews> reviewsCallback){
+    public void getReviews(long movieId, int page, Callback<ResultReviews> reviewsCallback) {
         Call<ResultReviews> reviewsCall;
-        reviewsCall = service.getReviews(movieId, API_KEY, page);
+        reviewsCall = mService.getReviews(movieId, API_KEY, page);
         reviewsCall.enqueue(reviewsCallback);
     }
 
     private boolean isPopularMoviesSetting() {
-        boolean isPopular = PreferencesHelper.readSpinnerOption(context) ==
+        boolean isPopular = PreferencesHelper.readSpinnerOption(mContext) ==
                 PreferencesHelper.POPULAR_SELECTION;
         return isPopular;
     }

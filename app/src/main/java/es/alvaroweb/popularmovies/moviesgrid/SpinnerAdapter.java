@@ -17,7 +17,7 @@ public class SpinnerAdapter extends ArrayAdapter<String> {
         super(context, resource, strArray);
     }
 
-    /** this is basically to delete the spinner title*/
+    /** this is basically to delete the mSpinner title*/
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = super.getView(position, convertView, parent);

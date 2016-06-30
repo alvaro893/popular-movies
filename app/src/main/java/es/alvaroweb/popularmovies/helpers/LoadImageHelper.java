@@ -17,18 +17,18 @@ import es.alvaroweb.popularmovies.R;
 public class LoadImageHelper {
     private static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
     private static final String IMAGE_SIZE = "w342";
-    private final Context context;
+    private final Context mContext;
 
     // private static final String[] SIZES = { "w92", "w154", "w185", "w342", "w500", "w780", "original"};
     public LoadImageHelper(Context context){
-        this.context = context;
+        this.mContext = context;
     }
 
     /** Loads and sets the image in the given relativePath parameter using a external library */
     public void setImage(ImageView view, String relativePath, boolean cropcenter) {
         String urlToLoad = IMAGE_BASE_URL + IMAGE_SIZE + relativePath;
         DrawableRequestBuilder<String> stringDrawableRequestBuilder = Glide
-                .with(context)
+                .with(mContext)
                 .load(urlToLoad)
                 .placeholder(R.drawable.ic_image_placeholder)
                 .error(R.drawable.unload_image_24dp)

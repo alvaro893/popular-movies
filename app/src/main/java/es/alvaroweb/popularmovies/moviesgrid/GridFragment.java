@@ -2,7 +2,6 @@ package es.alvaroweb.popularmovies.moviesgrid;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,8 +27,6 @@ import butterknife.OnClick;
 import butterknife.OnItemClick;
 import es.alvaroweb.popularmovies.R;
 import es.alvaroweb.popularmovies.data.MoviesContract;
-import es.alvaroweb.popularmovies.details.DetailFragment;
-import es.alvaroweb.popularmovies.details.DetailsActivity;
 import es.alvaroweb.popularmovies.helpers.PreferencesHelper;
 import es.alvaroweb.popularmovies.model.Movie;
 import es.alvaroweb.popularmovies.model.ResultMovies;
@@ -48,12 +45,10 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
     @BindView(R.id.movies_grid_view)
     GridView moviesGridView;
 
-    private MoviesAdapter moviesAdapter;
-    private ApiConnection apiConnection;
-    private boolean isFavorite = false;
+    private boolean mIsFavorite = false;
     private callback mListener;
-    private Activity context;
-    private ResultMovies resultMovies;
+    private Activity mActivity;
+    private ResultMovies mResultMovies;
 
     public GridFragment() {
         // Required empty public constructor
@@ -62,7 +57,7 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        context = getActivity();
+        mActivity = getActivity();
     }
 
     @Override
@@ -100,8 +95,8 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
             case FAVORITE_LOADER: {
                 Uri uri = MoviesContract.MovieEntry.buildMovieUri();
                 Log.d(DEBUG_TAG, "uri: " + uri);
-                context.setTitle(getString(R.string.favorites_title));
-                return new CursorLoader(context, uri, null, null, null, null);
+                mActivity.setTitle(getString(R.string.favorites_title));
+                return new CursorLoader(mActivity, uri, null, null, null, null);
             }
             default:
                 return null;
@@ -117,7 +112,7 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
         }
         setMoviesFromDb(data);
         setGridOfMovies();
-        isFavorite = true;
+        mIsFavorite = true;
     }
 
     @Override
@@ -127,7 +122,7 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
 
     // call it asynchronously
     public void setMoviesFromDb(Cursor cursor) {
-        resultMovies = new ResultMovies();
+        mResultMovies = new ResultMovies();
         if (cursor.moveToFirst()) {
             ArrayList<Movie> list = new ArrayList<>();
             do {
@@ -142,7 +137,7 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
                 movie.setVoteAverage(cursor.getFloat(cursor.getColumnIndex(MoviesContract.MovieEntry.COLUMN_VOTE_AVERAGE)));
                 list.add(movie);
             } while (cursor.moveToNext());
-            resultMovies.setResults(list);
+            mResultMovies.setResults(list);
         } else {
             return;
         }
@@ -152,20 +147,20 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
      * attaches the fetch results to the grid. NOTE: must be called asynchronously
      **/
     private void setGridOfMovies() {
-        List<Movie> movies = resultMovies.getResults();
+        List<Movie> movies = mResultMovies.getResults();
         if (movies.isEmpty()) {
             Toast.makeText(getActivity(), R.string.no_movies_message, Toast.LENGTH_SHORT).show();
         }
-        moviesAdapter = new MoviesAdapter(context, resultMovies.getResults());
+        MoviesAdapter moviesAdapter = new MoviesAdapter(mActivity, mResultMovies.getResults());
         moviesGridView.setAdapter(moviesAdapter);
         moviesAdapter.notifyDataSetChanged();
     }
 
     private void paginate(View v) {
         if (v.getId() == R.id.prev_fab) {
-            getResultMovies(resultMovies.getPreviousPage());
+            getResultMovies(mResultMovies.getPreviousPage());
         } else {
-            getResultMovies(resultMovies.getNextPage());
+            getResultMovies(mResultMovies.getNextPage());
         }
     }
 
@@ -173,12 +168,12 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
      * executes a callback when it get the results from the network
      **/
     public void getResultMovies(int page) {
-        apiConnection = new ApiConnection(context);
+        ApiConnection apiConnection = new ApiConnection(mActivity);
         apiConnection.getMovies(page, new Callback<ResultMovies>() {
             @Override
             public void onResponse(Call<ResultMovies> call, Response<ResultMovies> response) {
                 //Log.d(DEBUG_TAG, "response:" + response.code() + " for:" + call.request().url().toString());
-                resultMovies = response.body();
+                mResultMovies = response.body();
                 setGridOfMovies();
             }
 
@@ -192,10 +187,10 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @OnItemClick(R.id.movies_grid_view)
     void onMovieClick(AdapterView<?> parent, View view, int position, long id) {
-        Movie selectedMovie = resultMovies.getResults().get(position);
+        Movie selectedMovie = mResultMovies.getResults().get(position);
         // notify activity
         if (mListener != null) {
-            mListener.onMovieClick(selectedMovie, isFavorite);
+            mListener.onMovieClick(selectedMovie, mIsFavorite);
         }
     }
 

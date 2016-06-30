@@ -21,7 +21,6 @@ import butterknife.ButterKnife;
 import butterknife.OnItemSelected;
 import es.alvaroweb.popularmovies.R;
 import es.alvaroweb.popularmovies.data.MoviesContract;
-import es.alvaroweb.popularmovies.data.MoviesDBHelper;
 import es.alvaroweb.popularmovies.details.DetailFragment;
 import es.alvaroweb.popularmovies.details.DetailsActivity;
 import es.alvaroweb.popularmovies.helpers.PreferencesHelper;
@@ -31,10 +30,10 @@ import es.alvaroweb.popularmovies.settings.SettingsActivity;
 public class MainActivity extends AppCompatActivity implements GridFragment.callback{
 
     private static final String DEBUG_TAG = MainActivity.class.getSimpleName();
-    @BindView(R.id.spinner) Spinner spinner;
-    @BindArray(R.array.spinner_options) String[] spinnerOptions;
-    private GridFragment gridFragment;
-    private boolean isTwoPaneLayout = false;
+    @BindView(R.id.spinner) Spinner mSpinner;
+    @BindArray(R.array.spinner_options) String[] mSpinnerOptions;
+    private GridFragment mGridFragment;
+    private boolean mIsTwoPaneLayout = false;
 
 
     @Override
@@ -47,12 +46,12 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
         setSpinner();
 
         // get reference to static fragment
-        gridFragment = (GridFragment) getSupportFragmentManager()
+        mGridFragment = (GridFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.static_grid_fragment);
         // add an empty fragment if activity doesn't have saved info
         if(savedInstanceState == null){
             if(findViewById(R.id.detail_fragment_container) != null){
-                isTwoPaneLayout = true;
+                mIsTwoPaneLayout = true;
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.detail_fragment_container, new EmptyFragment())
                         .commit();
@@ -102,17 +101,17 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
         switch (pos){
             case PreferencesHelper.TOP_SELECTION:
                 PreferencesHelper.setSpinnerOption(PreferencesHelper.TOP_SELECTION, this);
-                gridFragment.fetchMoviesFromNetwork();
+                mGridFragment.fetchMoviesFromNetwork();
                 setTitle(getString(R.string.top_rated_title));
                 break;
             case PreferencesHelper.POPULAR_SELECTION:
                 PreferencesHelper.setSpinnerOption(PreferencesHelper.POPULAR_SELECTION, this);
-                gridFragment.fetchMoviesFromNetwork();
+                mGridFragment.fetchMoviesFromNetwork();
                 setTitle(getString(R.string.app_name));
                 break;
             case PreferencesHelper.FAVORITE_SELECTION:
                 PreferencesHelper.setSpinnerOption(PreferencesHelper.FAVORITE_SELECTION, this);
-                gridFragment.fetchMoviesFromDb();
+                mGridFragment.fetchMoviesFromDb();
                 setTitle(getString(R.string.favorites_title));
                 break;
             default:
@@ -123,17 +122,17 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
     private void setSpinner(){
         SpinnerAdapter adapter = new SpinnerAdapter(this,
                 android.R.layout.simple_spinner_item,
-                spinnerOptions);
-        // the styles of every spinner line are applied within the setDropDownViewResource
+                mSpinnerOptions);
+        // the styles of every mSpinner line are applied within the setDropDownViewResource
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        spinner.setSelection(PreferencesHelper.readSpinnerOption(this));
+        mSpinner.setAdapter(adapter);
+        mSpinner.setSelection(PreferencesHelper.readSpinnerOption(this));
     }
 
 
     @Override
     public void onMovieClick(Movie movie, boolean isFavorite) {
-        if(isTwoPaneLayout){
+        if(mIsTwoPaneLayout){
             replaceFragmentWithMovie(movie, isFavorite);
         }else{
             Intent intentDetailActivity = new Intent(this, DetailsActivity.class);

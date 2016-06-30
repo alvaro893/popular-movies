@@ -22,12 +22,12 @@ import es.alvaroweb.popularmovies.model.Movie;
  */
 public class MoviesAdapter extends ArrayAdapter<Movie> {
     private static final String DEBUG_TAG = MoviesAdapter.class.getSimpleName();
-    private ImageView image;
-    private LoadImageHelper imageHelper;
+    private ImageView mImage;
+    private LoadImageHelper mImageHelper;
 
     public MoviesAdapter(Context context, List<Movie> movies) {
         super(context, 0, movies);
-        imageHelper = new LoadImageHelper(getContext());
+        mImageHelper = new LoadImageHelper(getContext());
     }
 
 
@@ -42,8 +42,8 @@ public class MoviesAdapter extends ArrayAdapter<Movie> {
                     .inflate(R.layout.movie_row_layout, parent, false);
         }
 
-        image = (ImageView) convertView.findViewById(R.id.movie_image_row);
-        imageHelper.setImage(image, movie.getPosterPath(), true);
+        mImage = (ImageView) convertView.findViewById(R.id.movie_image_row);
+        mImageHelper.setImage(mImage, movie.getPosterPath(), true);
         return convertView;
     }
 }
