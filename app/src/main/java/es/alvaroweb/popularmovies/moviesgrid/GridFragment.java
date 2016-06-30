@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -153,8 +154,7 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
     private void setGridOfMovies() {
         List<Movie> movies = resultMovies.getResults();
         if (movies.isEmpty()) {
-            // TODO: display a message showing the user that the is no movies to be shown
-            Log.d(DEBUG_TAG, "no movies found");
+            Toast.makeText(getActivity(), R.string.no_movies_message, Toast.LENGTH_SHORT).show();
         }
         moviesAdapter = new MoviesAdapter(context, resultMovies.getResults());
         moviesGridView.setAdapter(moviesAdapter);

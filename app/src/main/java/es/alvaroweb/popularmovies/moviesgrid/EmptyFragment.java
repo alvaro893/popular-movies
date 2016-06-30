@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import es.alvaroweb.popularmovies.R;
 
 /*
- * TODO: Create JavaDoc
+ *  just an empty fragment with a message
  */
 public class EmptyFragment extends Fragment {
 

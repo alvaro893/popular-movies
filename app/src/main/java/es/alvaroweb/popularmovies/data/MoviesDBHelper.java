@@ -8,7 +8,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import static es.alvaroweb.popularmovies.data.MoviesContract.*;
 /*
- * TODO: Create JavaDoc
+ *  this class contains the callbacks of the lifecycle of the database
+ *  also it open the database and close it. It should be accessed from
+ *  a content provider
  */
 public class MoviesDBHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;

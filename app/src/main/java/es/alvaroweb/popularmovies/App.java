@@ -9,7 +9,7 @@ import android.content.Context;
 import com.facebook.stetho.Stetho;
 
 /*
- * TODO: Create JavaDoc
+ *  represents the application, some configuration can be handle here
  */
 public class App extends Application {
     @Override

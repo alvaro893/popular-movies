@@ -22,7 +22,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /*
- * TODO: Create JavaDoc
+ *  handles all the stuff related with the connection to the the web API
  */
 public class ApiConnection {
     private final static String URL_BASE = "https://api.themoviedb.org/";

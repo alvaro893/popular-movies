@@ -104,7 +104,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onStop() {
         super.onStop();
-        // avoid memory leaks. TODO: this is not enough to stop a memory leak.
         if(dbTask != null){
             dbTask.cancel(true);
         }

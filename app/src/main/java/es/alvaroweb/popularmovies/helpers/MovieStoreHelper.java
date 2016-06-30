@@ -20,7 +20,7 @@ import es.alvaroweb.popularmovies.model.ResultVideos.*;
 import static es.alvaroweb.popularmovies.data.MoviesContract.*;
 
 /*
- * TODO: This Class uses the movie content provider to perform operations in Activities
+ *  This Class uses the movie content provider to perform operations in Activities
  */
 public class MovieStoreHelper {
     private static final String DEBUG_TAG = MovieStoreHelper.class.getSimpleName();

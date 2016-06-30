@@ -9,7 +9,7 @@ import android.content.SharedPreferences;
 import es.alvaroweb.popularmovies.R;
 
 /*
- * TODO: class to handle shared preferences through the application
+ * handles shared preferences through the application
  */
 public class PreferencesHelper {
 

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /*
- * TODO: Create JavaDoc
+ * represents the videos (trailers) from JSON retrieved from server
  */
 public class ResultVideos {
     long id;

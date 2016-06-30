@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /*
- * TODO: Create JavaDoc
+ *  represents the reviews obtained from JSON retrieved from the server
  */
 public class ResultReviews {
     long id;

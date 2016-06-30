@@ -21,9 +21,8 @@
         <item name="spinner_top_favorites">Favorites</item>
     </array>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="to_start_click_a_movie">To start, click a movie</string>
     <string name="activity_details_title">Details</string>
     <string name="delete_favorites_menu">Delete Favorites</string>
+    <string name="no_movies_message">No movies found</string>
 </resources>
