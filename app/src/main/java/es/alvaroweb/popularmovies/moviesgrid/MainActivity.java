@@ -45,17 +45,19 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
         setSupportActionBar(toolbar);
         ButterKnife.bind(this);
         setSpinner();
-        // reference to static fragment
+
+        // get reference to static fragment
         gridFragment = (GridFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.static_grid_fragment);
-
-        if(findViewById(R.id.detail_fragment_container) != null){
-            isTwoPaneLayout = true;
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.detail_fragment_container, new EmptyFragment())
-                    .commit();
+        // add an empty fragment if activity doesn't have saved info
+        if(savedInstanceState == null){
+            if(findViewById(R.id.detail_fragment_container) != null){
+                isTwoPaneLayout = true;
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.detail_fragment_container, new EmptyFragment())
+                        .commit();
+            }
         }
-
     }
 
     private void replaceFragmentWithMovie(Movie movie, boolean isFavorite) {
