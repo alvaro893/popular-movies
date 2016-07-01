@@ -6,7 +6,11 @@ package es.alvaroweb.popularmovies.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import static es.alvaroweb.popularmovies.data.MoviesContract.*;
+
+import static es.alvaroweb.popularmovies.data.MoviesContract.MovieEntry;
+import static es.alvaroweb.popularmovies.data.MoviesContract.ReviewEntry;
+import static es.alvaroweb.popularmovies.data.MoviesContract.TestEntry;
+import static es.alvaroweb.popularmovies.data.MoviesContract.VideoEntry;
 /*
  *  this class contains the callbacks of the lifecycle of the database
  *  also it open the database and close it. It should be accessed from

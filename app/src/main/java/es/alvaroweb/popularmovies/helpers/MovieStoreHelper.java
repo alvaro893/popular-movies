@@ -12,12 +12,13 @@ import android.util.Log;
 
 import es.alvaroweb.popularmovies.model.Movie;
 import es.alvaroweb.popularmovies.model.ResultReviews;
-import es.alvaroweb.popularmovies.model.ResultReviews.*;
+import es.alvaroweb.popularmovies.model.ResultReviews.Review;
 import es.alvaroweb.popularmovies.model.ResultVideos;
-import es.alvaroweb.popularmovies.model.ResultVideos.*;
+import es.alvaroweb.popularmovies.model.ResultVideos.Video;
 
-
-import static es.alvaroweb.popularmovies.data.MoviesContract.*;
+import static es.alvaroweb.popularmovies.data.MoviesContract.MovieEntry;
+import static es.alvaroweb.popularmovies.data.MoviesContract.ReviewEntry;
+import static es.alvaroweb.popularmovies.data.MoviesContract.VideoEntry;
 
 /*
  *  This Class uses the mMovie content provider to perform operations in Activities
