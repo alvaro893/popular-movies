@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -18,9 +19,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import java.io.Serializable;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -179,7 +177,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     /** get the selected mMovie by the user from arguments **/
     private void getFragmentArguments(){
         Bundle extras = getArguments();
-        Serializable movie = extras.getSerializable(SELECTED_MOVIE_ARG);
+        Parcelable movie = extras.getParcelable(SELECTED_MOVIE_ARG);
         this.mIsFavorite = extras.getBoolean(IS_FAVORITE_ARG);
         this.mMovie = (Movie) movie;
     }

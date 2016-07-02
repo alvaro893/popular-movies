@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
 
     private void replaceFragmentWithMovie(Movie movie, boolean isFavorite) {
         Bundle args = new Bundle();
-        args.putSerializable(DetailFragment.SELECTED_MOVIE_ARG, movie);
+        args.putParcelable(DetailFragment.SELECTED_MOVIE_ARG, movie);
         args.putBoolean(DetailFragment.IS_FAVORITE_ARG, isFavorite);
         DetailFragment fragment = new DetailFragment();
         fragment.setArguments(args);

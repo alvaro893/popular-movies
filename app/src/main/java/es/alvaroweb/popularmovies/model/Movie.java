@@ -3,16 +3,17 @@
  */
 package es.alvaroweb.popularmovies.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import com.google.gson.annotations.SerializedName;
-
-import java.io.Serializable;
-
 /*
  * Represent a movie, objects from this class are deserialized from
  * a JSON document. Note: it does not use all properties in the JSON but
  * can be extended
  */
-public class Movie implements Serializable {
+public class Movie implements Parcelable {
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<Movie> CREATOR = new ParcelableCreatorMovie();
     private String title;
     private long id;
     private double popularity;
@@ -25,6 +26,20 @@ public class Movie implements Serializable {
     private String posterPath;
     @SerializedName("backdrop_path")
     private String backdropPath;
+    public Movie(){
+
+    }
+
+    protected Movie(Parcel in) {
+        title = in.readString();
+        id = in.readLong();
+        popularity = in.readDouble();
+        overview = in.readString();
+        voteAverage = in.readFloat();
+        releaseDate = in.readString();
+        posterPath = in.readString();
+        backdropPath = in.readString();
+    }
 
     public String getTitle() {
         return title;
@@ -103,5 +118,34 @@ public class Movie implements Serializable {
     @Override
     public String toString() {
         return String.format("%s, %d", title, id);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(title);
+        dest.writeLong(id);
+        dest.writeDouble(popularity);
+        dest.writeString(overview);
+        dest.writeFloat(voteAverage);
+        dest.writeString(releaseDate);
+        dest.writeString(posterPath);
+        dest.writeString(backdropPath);
+    }
+
+    private static class ParcelableCreatorMovie implements Parcelable.Creator<Movie>{
+        @Override
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
     }
 }
