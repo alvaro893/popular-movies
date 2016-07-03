@@ -25,4 +25,5 @@
     <string name="activity_details_title">Details</string>
     <string name="delete_favorites_menu">Delete Favorites</string>
     <string name="no_movies_message">No movies found</string>
+    <string name="no_internet_message">An Internet connection was not detected, but you can still open your favorite movies</string>
 </resources>

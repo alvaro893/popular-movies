@@ -1,10 +1,9 @@
-    <fragment
+    <FrameLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="es.alvaroweb.popularmovies.moviesgrid.GridFragment"
-        android:id="@+id/static_grid_fragment"
+        android:id="@+id/grid_fragment_container"
         tools:showIn="@layout/activity_main"
         tools:layout="@layout/fragment_grid" />
 

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -42,8 +43,10 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
     private static final int FAVORITE_LOADER = 0;
     private static final int DEFAULT_PAGE = 1;
     private static final String DEBUG_TAG = GridFragment.class.getSimpleName();
-    @BindView(R.id.movies_grid_view)
-    GridView moviesGridView;
+    @BindView(R.id.movies_grid_view) GridView moviesGridView;
+    @BindView(R.id.next_fab) FloatingActionButton nextButton;
+    @BindView(R.id.prev_fab) FloatingActionButton prevButton;
+
 
     private boolean mIsFavorite = false;
     private callback mListener;
@@ -153,7 +156,9 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
         }
         MoviesAdapter moviesAdapter = new MoviesAdapter(mActivity, mResultMovies.getResults());
         moviesGridView.setAdapter(moviesAdapter);
-        moviesAdapter.notifyDataSetChanged();
+//        moviesAdapter.notifyDataSetChanged();
+        nextButton.setVisibility(View.VISIBLE);
+        prevButton.setVisibility(View.VISIBLE);
     }
 
     private void paginate(View v) {

@@ -4,12 +4,12 @@
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <fragment
+    <FrameLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:name="es.alvaroweb.popularmovies.moviesgrid.GridFragment"
-        android:id="@+id/static_grid_fragment"
+        android:id="@+id/grid_fragment_container"
         tools:layout="@layout/fragment_grid"
+        tools:showIn="@layout/activity_main"
         android:layout_weight="1.3" />
 
     <FrameLayout
