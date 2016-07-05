@@ -19,7 +19,6 @@ import android.widget.Spinner;
 import butterknife.BindArray;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnItemClick;
 import butterknife.OnItemSelected;
 import es.alvaroweb.popularmovies.R;
 import es.alvaroweb.popularmovies.data.MoviesContract;
@@ -33,10 +32,12 @@ import es.alvaroweb.popularmovies.settings.SettingsActivity;
 public class MainActivity extends AppCompatActivity implements GridFragment.callback{
 
     private static final String DEBUG_TAG = MainActivity.class.getSimpleName();
+    private static final String TAG_GRID_FRAGMENT = "GRIDFG";
     @BindView(R.id.spinner) Spinner mSpinner;
     @BindArray(R.array.spinner_options) String[] mSpinnerOptions;
     private GridFragment mGridFragment;
     private boolean mIsTwoPaneLayout = false;
+    private boolean mSpinnerHasChanged = false;
 
 
     @Override
@@ -45,11 +46,12 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        setGridFragment();
 
-        // no need to create fragments if state was saved
         if(savedInstanceState == null){
             setDetailFragment();
+            createGridFragment();
+        }else{
+            restoreGridFragment(savedInstanceState);
         }
 
         ButterKnife.bind(this);
@@ -57,11 +59,25 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+            getSupportFragmentManager().putFragment(outState, TAG_GRID_FRAGMENT, mGridFragment);
     }
 
+    private void restoreGridFragment(Bundle savedInstanceState) {
+//        if(mSpinnerHasChanged){
+//            savedInstanceState = null;
+//        }
+        mGridFragment = (GridFragment) getSupportFragmentManager()
+                .getFragment(savedInstanceState, TAG_GRID_FRAGMENT);
+    }
+
+    private void createGridFragment() {
+        mGridFragment = new GridFragment();
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.grid_fragment_container, mGridFragment, TAG_GRID_FRAGMENT)
+                .commit();
+    }
 
     private void setDetailFragment() {
         int detailContainerId = R.id.detail_fragment_container;
@@ -76,18 +92,14 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
         }
     }
 
-    private void setGridFragment() {
+    private void setEmptyFragmentOnNetworkFailure() {
         int gridContainerId = R.id.grid_fragment_container;
-        //FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         boolean isNetworkAvilable = SystemServicesHelper.isNetworkAvailable(this);
         // put empty fragment if no network connection exists
-        if(isNetworkAvilable) {
-            mGridFragment = new GridFragment();
-            getSupportFragmentManager().beginTransaction()
-                    .replace(gridContainerId, mGridFragment)
-                    .commit();
-        }else{
-            EmptyFragment emptyFragment = EmptyFragment.newInstance(getString(R.string.no_internet_message));
+        if (!isNetworkAvilable) {
+            EmptyFragment emptyFragment = EmptyFragment
+                    .newInstance(getString(R.string.no_internet_message));
+
             getSupportFragmentManager().beginTransaction()
                     .replace(gridContainerId, emptyFragment)
                     .commit();
@@ -131,44 +143,46 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
         }
         return super.onOptionsItemSelected(item);
     }
-
+    /** called when an option in the spinner is selected. Note: this is called automatically when the
+     * view spinner is created */
     @OnItemSelected(R.id.spinner)
-    void clickSpinnerItem(AdapterView<?> parent, View view, int pos, long id){
-
+    void selectSpinnerItem(AdapterView<?> parent, View view, int pos, long id){
+        Log.d(DEBUG_TAG, "onitemSelected"+id);
+        if (mSpinnerHasChanged){
+            mGridFragment.setDefaultState();
+        }
         switch (pos){
             case PreferencesHelper.TOP_SELECTION:
                 PreferencesHelper.setSpinnerOption(PreferencesHelper.TOP_SELECTION, this);
-                setGridFragment();
-                if(mGridFragment != null){
-                    mGridFragment.fetchMoviesFromNetwork();
-                }
+                setGridFromInternetMovies();
                 setTitle(getString(R.string.top_rated_title));
                 break;
             case PreferencesHelper.POPULAR_SELECTION:
                 PreferencesHelper.setSpinnerOption(PreferencesHelper.POPULAR_SELECTION, this);
-                setGridFragment();
-                if(mGridFragment != null){
-                    mGridFragment.fetchMoviesFromNetwork();
-                }
+                setGridFromInternetMovies();
                 setTitle(getString(R.string.app_name));
                 break;
             case PreferencesHelper.FAVORITE_SELECTION:
-                // favorite movies must be ALWAYS available, even with no Internet
-                setGridFragmentForFavorites();
-                mGridFragment.fetchMoviesFromDb();
                 PreferencesHelper.setSpinnerOption(PreferencesHelper.FAVORITE_SELECTION, this);
-                setTitle(getString(R.string.favorites_title));
+                setGridFragmentForFavorites();
                 break;
             default:
                 break;
         }
+        mSpinnerHasChanged = true;
+    }
+
+    private void setGridFromInternetMovies(){
+        setEmptyFragmentOnNetworkFailure();
+        mGridFragment.fetchMoviesFromNetwork();
     }
 
     private void setGridFragmentForFavorites() {
-        mGridFragment = new GridFragment();
-        getSupportFragmentManager().beginTransaction().
-                replace(R.id.grid_fragment_container, mGridFragment ).commit();
-        getSupportFragmentManager().executePendingTransactions();
+        if(mGridFragment == null){
+            createGridFragment();
+        }
+        mGridFragment.fetchMoviesFromDb();
+        setTitle(getString(R.string.favorites_title));
     }
 
     private void setSpinner(){
@@ -184,6 +198,7 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
 
     @Override
     public void onMovieClick(Movie movie, boolean isFavorite) {
+        mSpinnerHasChanged = false;
         if(mIsTwoPaneLayout){
             replaceFragmentWithMovie(movie, isFavorite);
         }else{
@@ -192,6 +207,5 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
             intentDetailActivity.putExtra(getString(R.string.IS_FAVORITE), isFavorite);
             startActivity(intentDetailActivity);
         }
-
     }
 }

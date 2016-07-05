@@ -3,6 +3,7 @@ package es.alvaroweb.popularmovies.moviesgrid;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -42,7 +43,10 @@ import retrofit2.Response;
 public class GridFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final int FAVORITE_LOADER = 0;
     private static final int DEFAULT_PAGE = 1;
+    private static final int DEFAULT_POSITION = 1;
     private static final String DEBUG_TAG = GridFragment.class.getSimpleName();
+    private static final String SAVED_POSITION = "position";
+    private static final String SAVED_PAGE = "page";
     @BindView(R.id.movies_grid_view) GridView moviesGridView;
     @BindView(R.id.next_fab) FloatingActionButton nextButton;
     @BindView(R.id.prev_fab) FloatingActionButton prevButton;
@@ -52,6 +56,8 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
     private callback mListener;
     private Activity mActivity;
     private ResultMovies mResultMovies;
+    private int mPosition = DEFAULT_POSITION;
+    private int mPage = DEFAULT_PAGE;
 
     public GridFragment() {
         // Required empty public constructor
@@ -64,14 +70,28 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if(savedInstanceState != null){
+            mPosition = savedInstanceState.getInt(SAVED_POSITION);
+            mPage = savedInstanceState.getInt(SAVED_PAGE);
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_grid, container, false);
         ButterKnife.bind(this, view);
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(SAVED_PAGE, mPage);
+        outState.putInt(SAVED_POSITION, mPosition);
     }
 
 
@@ -97,7 +117,6 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
         switch (id) {
             case FAVORITE_LOADER: {
                 Uri uri = MoviesContract.MovieEntry.buildMovieUri();
-                Log.d(DEBUG_TAG, "uri: " + uri);
                 mActivity.setTitle(getString(R.string.favorites_title));
                 return new CursorLoader(mActivity, uri, null, null, null, null);
             }
@@ -156,17 +175,25 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
         }
         MoviesAdapter moviesAdapter = new MoviesAdapter(mActivity, mResultMovies.getResults());
         moviesGridView.setAdapter(moviesAdapter);
-//        moviesAdapter.notifyDataSetChanged();
         nextButton.setVisibility(View.VISIBLE);
         prevButton.setVisibility(View.VISIBLE);
+        // recover last position
+        //moviesGridView.setSelection(mPosition);
+        Log.d(DEBUG_TAG, "scroll to " +mPosition);
+        moviesGridView.smoothScrollToPosition(mPosition);
     }
 
     private void paginate(View v) {
+        int currentPage;
         if (v.getId() == R.id.prev_fab) {
-            getResultMovies(mResultMovies.getPreviousPage());
+            currentPage = mResultMovies.getPreviousPage();
         } else {
-            getResultMovies(mResultMovies.getNextPage());
+           currentPage = mResultMovies.getNextPage();
         }
+        getResultMovies(currentPage);
+        // save page
+        mPage = currentPage;
+        mPosition = DEFAULT_POSITION;
     }
 
     /**
@@ -197,6 +224,8 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
         if (mListener != null) {
             mListener.onMovieClick(selectedMovie, mIsFavorite);
         }
+        //save position in the grid
+        mPosition = position;
     }
 
     @OnClick(R.id.prev_fab)
@@ -210,11 +239,16 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     public void fetchMoviesFromNetwork() {
-        getResultMovies(DEFAULT_PAGE);
+        getResultMovies(mPage);
     }
 
     public void fetchMoviesFromDb() {
         getLoaderManager().initLoader(FAVORITE_LOADER, null, this);
+    }
+
+    public void setDefaultState() {
+        mPosition = DEFAULT_POSITION;
+        mPage = DEFAULT_PAGE;
     }
 
 
