@@ -65,18 +65,20 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
     }
 
     private void restoreGridFragment(Bundle savedInstanceState) {
-//        if(mSpinnerHasChanged){
-//            savedInstanceState = null;
-//        }
         mGridFragment = (GridFragment) getSupportFragmentManager()
                 .getFragment(savedInstanceState, TAG_GRID_FRAGMENT);
     }
 
     private void createGridFragment() {
         mGridFragment = new GridFragment();
+        addGridFragment();
+    }
+
+    private void addGridFragment(){
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.grid_fragment_container, mGridFragment, TAG_GRID_FRAGMENT)
                 .commit();
+        getSupportFragmentManager().executePendingTransactions();
     }
 
     private void setDetailFragment() {
@@ -178,8 +180,8 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
     }
 
     private void setGridFragmentForFavorites() {
-        if(mGridFragment == null){
-            createGridFragment();
+        if(!mGridFragment.isAdded()){
+            addGridFragment();
         }
         mGridFragment.fetchMoviesFromDb();
         setTitle(getString(R.string.favorites_title));

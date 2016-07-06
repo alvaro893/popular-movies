@@ -243,7 +243,9 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     public void fetchMoviesFromDb() {
-        getLoaderManager().initLoader(FAVORITE_LOADER, null, this);
+        if(isAdded()) {
+            getLoaderManager().initLoader(FAVORITE_LOADER, null, this);
+        }
     }
 
     public void setDefaultState() {
