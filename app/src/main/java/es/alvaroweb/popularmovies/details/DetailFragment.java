@@ -44,7 +44,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private static final int VIDEOS_LOADER = 2;
     private static final int DEFAULT_PAGE = 1;
     private static final String DEBUG_TAG = DetailFragment.class.getSimpleName();
-    public static final String IS_FAVORITE_ARG = "is favorite";
     @BindView(R.id.plot_text_view) TextView mPlot;
     @BindView(R.id.year_text_view) TextView mYear;
     @BindView(R.id.back_drop_image)ImageView mBackdrop;
@@ -73,7 +72,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         super.onCreate(savedInstanceState);
         mActivity = getActivity();
         getFragmentArguments();
-        networkAndDatabaseTasks();
+        // this loader will check if the mMovie is a favorite
+        getLoaderManager().initLoader(FAVORITE_LOADER, null, this);
     }
 
     @Override
@@ -101,6 +101,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     private void networkAndDatabaseTasks() {
+        if(mResultReviews != null){
+            return;
+        }
         if(mIsFavorite){
             getLoaderManager().initLoader(REVIEWS_LOADER,null,this);
             getLoaderManager().initLoader(VIDEOS_LOADER,null,this);
@@ -109,9 +112,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             requestResultVideos();
             requestResultReviews(DEFAULT_PAGE);
         }
-
-        // this loader will check if the mMovie is a favorite
-        getLoaderManager().initLoader(FAVORITE_LOADER, null, this);
     }
     /** creates a review and adds it the review section **/
     private void addReview(ResultReviews.Review review){
@@ -154,10 +154,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private void movieIsFavorite() {
         mFavoriteButton.setImageResource(R.drawable.ic_star_yellow_24dp);
+        mIsFavorite = true;
     }
 
     private void movieIsNotFavorite() {
         mFavoriteButton.setImageResource(R.drawable.ic_start_white_24dp);
+        mIsFavorite = false;
     }
 
 
@@ -178,7 +180,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private void getFragmentArguments(){
         Bundle extras = getArguments();
         Parcelable movie = extras.getParcelable(SELECTED_MOVIE_ARG);
-        this.mIsFavorite = extras.getBoolean(IS_FAVORITE_ARG);
         this.mMovie = (Movie) movie;
     }
 
@@ -267,6 +268,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 }else{
                     movieIsNotFavorite();
                 }
+                networkAndDatabaseTasks();
                 break;
             case REVIEWS_LOADER:
                 setReviewsFromDb(data);

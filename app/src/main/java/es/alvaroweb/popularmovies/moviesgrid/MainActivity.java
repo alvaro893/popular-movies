@@ -111,10 +111,9 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
         getSupportFragmentManager().executePendingTransactions();
     }
 
-    private void replaceFragmentWithMovie(Movie movie, boolean isFavorite) {
+    private void replaceFragmentWithMovie(Movie movie) {
         Bundle args = new Bundle();
         args.putParcelable(DetailFragment.SELECTED_MOVIE_ARG, movie);
-        args.putBoolean(DetailFragment.IS_FAVORITE_ARG, isFavorite);
         DetailFragment fragment = new DetailFragment();
         fragment.setArguments(args);
 
@@ -201,14 +200,13 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
 
 
     @Override
-    public void onMovieClick(Movie movie, boolean isFavorite) {
+    public void onMovieClick(Movie movie) {
         mSpinnerHasChanged = false;
         if(mIsTwoPaneLayout){
-            replaceFragmentWithMovie(movie, isFavorite);
+            replaceFragmentWithMovie(movie);
         }else{
             Intent intentDetailActivity = new Intent(this, DetailsActivity.class);
             intentDetailActivity.putExtra(DetailFragment.SELECTED_MOVIE_ARG, movie);
-            intentDetailActivity.putExtra(getString(R.string.IS_FAVORITE), isFavorite);
             startActivity(intentDetailActivity);
         }
     }

@@ -52,7 +52,6 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
     @BindView(R.id.prev_fab) FloatingActionButton prevButton;
 
 
-    private boolean mIsFavorite = false;
     private callback mListener;
     private Activity mActivity;
     private ResultMovies mResultMovies;
@@ -134,7 +133,6 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
         }
         setMoviesFromDb(data);
         setGridOfMovies();
-        mIsFavorite = true;
     }
 
     @Override
@@ -222,7 +220,7 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
         Movie selectedMovie = mResultMovies.getResults().get(position);
         // notify activity
         if (mListener != null) {
-            mListener.onMovieClick(selectedMovie, mIsFavorite);
+            mListener.onMovieClick(selectedMovie);
         }
         //save position in the grid
         mPosition = position;
@@ -261,6 +259,6 @@ public class GridFragment extends Fragment implements LoaderManager.LoaderCallba
      * activity.
      */
     public interface callback {
-        void onMovieClick(Movie movie, boolean isFavorite);
+        void onMovieClick(Movie movie);
     }
 }
