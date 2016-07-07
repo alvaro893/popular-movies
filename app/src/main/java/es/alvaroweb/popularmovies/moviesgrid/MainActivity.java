@@ -86,6 +86,9 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
     }
 
     private void setDetailFragment() {
+        if(!mIsTwoPaneLayout){
+            return;
+        }
         int detailContainerId = R.id.detail_fragment_container;
         // add empty fragment if this is a two pane layout
 
