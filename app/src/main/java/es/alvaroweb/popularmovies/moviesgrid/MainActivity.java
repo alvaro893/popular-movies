@@ -138,10 +138,10 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
         int id = item.getItemId();
 
         switch (id){
-            case R.id.action_settings:
-                Intent intentSettings = new Intent(this, SettingsActivity.class);
-                startActivity(intentSettings);
-                return true;
+//            case R.id.action_settings:
+//                Intent intentSettings = new Intent(this, SettingsActivity.class);
+//                startActivity(intentSettings);
+//                return true;
             case R.id.action_delete_favorites:
                 Uri uri = MoviesContract.MovieEntry.buildMovieUri();
                 getContentResolver().delete(uri, null, null);
