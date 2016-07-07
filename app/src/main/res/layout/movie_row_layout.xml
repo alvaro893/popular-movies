@@ -1,15 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:foreground="@drawable/ripple">
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/movie_thumbnail_height"
-        android:id="@+id/movie_image_row"
-        android:layout_gravity="center"
-        android:contentDescription="@string/movie_image_description"
-        />
-
-</FrameLayout>
+<ImageView android:layout_width="match_parent"
+    android:layout_height="@dimen/movie_thumbnail_height"
+    android:foreground="@drawable/ripple"
+    android:id="@+id/movie_image_row"
+    android:layout_gravity="center"
+    android:contentDescription="@string/movie_image_description"
+    xmlns:android="http://schemas.android.com/apk/res/android" />

@@ -47,6 +47,10 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        if(findViewById(R.id.detail_fragment_container) != null){
+            mIsTwoPaneLayout = true;
+        }
+
         if(savedInstanceState == null){
             setDetailFragment();
             createGridFragment();
@@ -84,14 +88,12 @@ public class MainActivity extends AppCompatActivity implements GridFragment.call
     private void setDetailFragment() {
         int detailContainerId = R.id.detail_fragment_container;
         // add empty fragment if this is a two pane layout
-        if(findViewById(detailContainerId) != null){
-            mIsTwoPaneLayout = true;
+
             EmptyFragment emptyFragment =
                     EmptyFragment.newInstance(getString(R.string.to_start_click_a_movie));
             getSupportFragmentManager().beginTransaction()
                     .replace(detailContainerId, emptyFragment)
                     .commit();
-        }
     }
 
     private void setEmptyFragmentOnNetworkFailure() {
